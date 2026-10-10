@@ -1,0 +1,1413 @@
+<!DOCTYPE html>
+<html lang="es" class="no-js">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0e0c0a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script>document.documentElement.classList.replace("no-js","js")</script>
+<title>Recupere su Tiempo</title>
+<meta name="description" content="Programa de Inteligencia Artificial práctica para empresarios: presentación interactiva, cronograma y medidor de tiempo ahorrado.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..800;1,9..144,300..800&family=DM+Sans:opsz,wght@9..40,400..700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0e0c0a; --bg2:#17130f; --bg3:#211b15;
+  --ink:#f4ede1; --muted:#a99f8f; --line:rgba(244,237,225,.13);
+  --gold:#f2b544; --gold2:#ff8a3d; --goldsoft:rgba(242,181,68,.14);
+  --green:#5fd08a; --amber:#f2b544; --red:#ff6b5d;
+  --shadow:0 30px 80px -30px rgba(0,0,0,.7);
+  --fs:1rem;
+  color-scheme:dark;
+}
+:root[data-theme="light"]{
+  --bg:#f6f1e7; --bg2:#ece4d4; --bg3:#e2d8c4;
+  --ink:#1b1712; --muted:#6b6153; --line:rgba(27,23,18,.14);
+  --gold:#b8740f; --gold2:#d4521c; --goldsoft:rgba(184,116,15,.12);
+  --green:#1f8a4c; --amber:#b8740f; --red:#c7392b;
+  --shadow:0 30px 80px -30px rgba(60,40,10,.35);
+  color-scheme:light;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
+html{font-size:calc(18px * var(--scale,1));scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+@media (max-width:700px){html{font-size:calc(16px * var(--scale,1))}}
+body{-webkit-tap-highlight-color:transparent;background:var(--bg);color:var(--ink);font-family:"DM Sans",system-ui,sans-serif;line-height:1.55;overflow-x:hidden;transition:background .5s,color .5s}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:100;opacity:.06;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+h1,h2,h3,.serif{font-family:"Fraunces",Georgia,serif;font-weight:500;letter-spacing:-.02em;line-height:1.05}
+em{font-style:italic;color:var(--gold)}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--gold);outline-offset:3px;border-radius:6px}
+
+/* Chrome */
+#bar{position:fixed;top:0;left:0;height:4px;width:0;background:linear-gradient(90deg,var(--gold),var(--gold2));z-index:60}
+.controls{position:fixed;top:14px;right:16px;z-index:60;display:flex;gap:6px}
+.controls button{background:color-mix(in srgb,var(--bg2) 80%,transparent);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:999px;height:40px;min-width:40px;padding:0 12px;font-weight:600;font-size:.85rem}
+.controls button:hover{border-color:var(--gold)}
+#dots{position:fixed;right:18px;top:50%;transform:translateY(-50%);z-index:55;display:flex;flex-direction:column;gap:12px}
+#dots a{display:flex;align-items:center;justify-content:flex-end;gap:10px;text-decoration:none;color:var(--muted);font-size:.72rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+#dots a span{opacity:0;transform:translateX(6px);transition:.25s;white-space:nowrap}
+#dots a:hover span,#dots a.on span{opacity:1;transform:none}
+#dots a.on{color:var(--gold)}
+#dots a i{width:9px;height:9px;border-radius:50%;border:1.5px solid currentColor;transition:.3s;flex:none}
+#dots a.on i{background:var(--gold);transform:scale(1.35)}
+#hud{position:fixed;left:18px;bottom:18px;z-index:55;display:flex;align-items:center;gap:12px;background:color-mix(in srgb,var(--bg2) 82%,transparent);backdrop-filter:blur(12px);border:1px solid var(--line);border-radius:999px;padding:6px 16px 6px 6px}
+#hud svg{width:36px;height:36px}
+#hud .l1{font-size:.68rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
+#hud .l2{font-weight:700;font-size:.9rem}
+@media (max-width:900px){#dots{display:none}}
+@media (max-width:560px){#hud{display:none}}
+
+/* Layout */
+section{position:relative}
+.slide{min-height:100vh;min-height:100svh;padding:14vh max(6vw,18px) 12vh;display:flex;flex-direction:column;justify-content:center}
+.wrap{max-width:1180px;margin:0 auto;width:100%}
+.kicker{font-size:.78rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:1.2rem;display:flex;align-items:center;gap:.8rem}
+.kicker::before{content:"";width:34px;height:1.5px;background:currentColor}
+h2{font-size:clamp(2.3rem,5.4vw,4.6rem);margin-bottom:1.4rem}
+.lead{font-size:clamp(1.1rem,1.6vw,1.35rem);color:var(--muted);max-width:44rem}
+.js .rv{opacity:0;transform:translateY(40px);transition:opacity .9s cubic-bezier(.2,.7,.2,1),transform .9s cubic-bezier(.2,.7,.2,1)}
+.js .rv.in{opacity:1;transform:none}
+.d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}.d4{transition-delay:.4s}
+.card{background:var(--bg2);border:1px solid var(--line);border-radius:22px;padding:1.6rem}
+.btn{display:inline-flex;align-items:center;gap:.5rem;border:1px solid var(--line);background:var(--bg2);border-radius:999px;padding:.7rem 1.2rem;font-weight:600}
+.btn:hover{border-color:var(--gold)}
+.btn.primary{background:var(--gold);color:#1a1206;border-color:var(--gold)}
+
+/* Hero */
+#hero{min-height:100vh;min-height:100svh;overflow:hidden;display:flex;align-items:center;padding:0 max(6vw,18px)}
+#hero .glow{position:absolute;width:80vmax;height:80vmax;right:-30vmax;top:-20vmax;background:radial-gradient(circle,var(--goldsoft),transparent 60%);pointer-events:none}
+#bigclock{position:absolute;right:-8vmin;top:50%;width:min(92vmin,900px);transform:translateY(-50%);opacity:.9}
+#bigclock .tick{stroke:var(--muted);opacity:.45}
+#bigclock .tick.h{stroke:var(--ink);opacity:.8}
+#hero h1{font-size:clamp(3.4rem,10vw,9.5rem);font-weight:400;max-width:12ch;position:relative}
+#hero h1 .w{display:inline-block;opacity:0;transform:translateY(60%) rotate(4deg);animation:up 1.1s cubic-bezier(.2,.7,.2,1) forwards}
+@keyframes up{to{opacity:1;transform:none}}
+#hero .lead{margin-top:1.6rem;position:relative}
+.cue{position:absolute;left:50%;transform:translateX(-50%);bottom:5vh;white-space:nowrap;display:flex;align-items:center;gap:.8rem;color:var(--muted);font-size:.85rem}
+.cue b{width:24px;height:38px;border:1.5px solid var(--muted);border-radius:12px;position:relative}
+.cue b::after{content:"";position:absolute;left:50%;top:7px;width:4px;height:8px;margin-left:-2px;border-radius:2px;background:var(--gold);animation:cue 1.6s infinite}
+@keyframes cue{60%{transform:translateY(12px);opacity:0}100%{opacity:0}}
+.hero-in{position:relative;z-index:2;max-width:1180px;width:100%;margin:0 auto}
+@media (max-width:800px){#bigclock{right:-35vw;opacity:.35}}
+
+/* Pinned sections */
+.pin{position:relative}
+.pin>.stick{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;display:flex;align-items:center;padding:0 max(6vw,18px)}
+
+/* Week */
+#week{height:420vh}
+.week-grid{display:grid;grid-template-columns:1fr 1.5fr;gap:5vw;align-items:center;width:100%;max-width:1180px;margin:0 auto}
+.week-head h2{transition:opacity .4s}
+.bigcount{font-family:"Fraunces",serif;font-size:clamp(4rem,11vw,9rem);line-height:1;color:var(--gold);font-variant-numeric:tabular-nums}
+.bigcount small{font-size:.35em;color:var(--muted);margin-left:.2em}
+.countlbl{color:var(--muted);font-weight:600;letter-spacing:.08em;text-transform:uppercase;font-size:.8rem;margin-top:.4rem}
+.js .wrow{opacity:0;transform:translateX(30px)}
+.wrow{display:grid;grid-template-columns:minmax(8rem,13rem) 1fr 3.4rem;gap:1rem;align-items:center;margin:.85rem 0;transition:opacity .5s,transform .5s}
+.wrow.on{opacity:1;transform:none}
+.wlabel{font-weight:600;font-size:1rem}
+.wtrack{height:30px;border-radius:8px;background:var(--bg2);position:relative;overflow:hidden;border:1px solid var(--line)}
+.wbar{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--muted),color-mix(in srgb,var(--ink) 70%,var(--muted)));border-radius:7px 0 0 7px;opacity:.75}
+.wsave{position:absolute;top:0;bottom:0;background:repeating-linear-gradient(135deg,var(--gold) 0 6px,color-mix(in srgb,var(--gold) 55%,transparent) 6px 12px);box-shadow:0 0 22px var(--gold)}
+.wval{font-variant-numeric:tabular-nums;font-weight:700;text-align:right}
+.note{font-size:.8rem;color:var(--muted);margin-top:1.2rem}
+@media (max-width:860px){.week-grid{grid-template-columns:1fr;gap:1.2rem}.wrow{grid-template-columns:7.5rem 1fr 2.8rem;margin:.55rem 0}.wlabel{font-size:.85rem}.bigcount{font-size:3.6rem}.week-head h2{font-size:2rem;margin-bottom:.4rem}}
+
+/* IA */
+.meta-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin-top:2.4rem}
+.meta-grid .card h3{font-size:1.5rem;margin:.8rem 0 .5rem}
+.meta-grid .card p{color:var(--muted)}
+.ico{width:52px;height:52px;border-radius:14px;background:var(--goldsoft);display:grid;place-items:center;color:var(--gold)}
+.ico svg{width:28px;height:28px}
+@media (max-width:860px){.meta-grid{grid-template-columns:1fr}}
+.chat{margin-top:2.4rem;max-width:760px;display:flex;flex-direction:column;gap:1rem}
+.msg{padding:1.1rem 1.3rem;border-radius:20px;max-width:90%;font-size:1.05rem;min-height:3.2rem}
+.msg.user{align-self:flex-end;background:var(--bg3);border-bottom-right-radius:6px}
+.msg.ai{align-self:flex-start;background:var(--goldsoft);border:1px solid color-mix(in srgb,var(--gold) 35%,transparent);border-bottom-left-radius:6px}
+.msg .who{display:block;font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem;font-weight:700}
+.caret::after{content:"▍";color:var(--gold);animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:0}}
+.chip{display:inline-flex;align-items:center;gap:.5rem;border-radius:999px;padding:.45rem .9rem;background:var(--bg2);border:1px solid var(--line);font-size:.85rem;font-weight:600}
+.chat-foot{display:flex;gap:.7rem;flex-wrap:wrap;align-items:center;opacity:0;transition:opacity .6s}
+.chat-foot.on{opacity:1}
+
+/* Evidence */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem;margin-top:2.6rem}
+.stat{border-top:2px solid var(--gold);padding-top:1.2rem}
+.stat .n{font-family:"Fraunces",serif;font-size:clamp(3rem,6vw,5.2rem);line-height:1;font-variant-numeric:tabular-nums}
+.stat .n sup{font-size:.4em;color:var(--gold);vertical-align:.9em;margin-left:.1em}
+.stat p{margin:.8rem 0 .6rem;font-weight:600}
+.stat cite{font-style:normal;font-size:.78rem;color:var(--muted)}
+.insight{margin-top:3rem;display:flex;gap:1.2rem;align-items:flex-start;padding:1.4rem 1.6rem;border-radius:20px;background:var(--goldsoft)}
+.insight b{color:var(--gold)}
+@media (max-width:900px){.stats{grid-template-columns:1fr 1fr}}
+
+/* Frontier */
+.frontier{position:relative;margin-top:2.4rem;border-radius:26px;background:var(--bg2);border:1px solid var(--line);min-height:430px;overflow:hidden;display:grid;grid-template-columns:1fr 1fr}
+.frontier svg.jag{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.frontier .jag path{fill:none;stroke:var(--gold);stroke-width:3;stroke-dasharray:1600;stroke-dashoffset:1600;transition:stroke-dashoffset 2.4s ease}
+.frontier.in .jag path{stroke-dashoffset:0}
+.zone{padding:2rem;position:relative;z-index:1}
+.zone h3{font-size:1.6rem;margin-bottom:.3rem}
+.zone>p{color:var(--muted);margin-bottom:1.2rem}
+.zone ul{list-style:none;display:flex;flex-direction:column;gap:.6rem}
+.zone li{display:flex;gap:.7rem;align-items:center;font-weight:600;font-size:1.02rem}
+.zone li i{font-style:normal;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:.85rem;flex:none}
+.zone.ok li i{background:color-mix(in srgb,var(--green) 22%,transparent);color:var(--green)}
+.zone.no li i{background:color-mix(in srgb,var(--red) 22%,transparent);color:var(--red)}
+.zone.no{text-align:left;padding-left:3rem}
+@media (max-width:760px){.frontier{grid-template-columns:1fr}.frontier svg.jag{display:none}.zone.no{padding-left:2rem;border-top:2px dashed var(--gold)}}
+
+/* PEDIR */
+.pedir{display:grid;grid-template-columns:1.1fr 1fr;gap:2rem;margin-top:2.4rem;align-items:start}
+.letters{display:flex;gap:.7rem;flex-wrap:wrap}
+.letter{flex:1 1 0;min-width:88px;border:1.5px solid var(--line);background:var(--bg2);border-radius:20px;padding:1rem .8rem;text-align:left;transition:.25s}
+.letter b{display:block;font-family:"Fraunces",serif;font-size:2.6rem;line-height:1;font-weight:500;color:var(--muted);transition:.25s}
+.letter span{font-size:.82rem;font-weight:700;letter-spacing:.04em}
+.letter.on{border-color:var(--gold);background:var(--goldsoft);transform:translateY(-4px)}
+.letter.on b{color:var(--gold)}
+.prompt{margin-top:1.3rem;min-height:12rem;font-size:1.05rem}
+.prompt .seg{display:inline;animation:fade .5s}
+.prompt .seg mark{background:none;color:var(--gold);font-weight:700}
+.prompt .empty{color:var(--muted);font-style:italic}
+@keyframes fade{from{opacity:0}}
+.meter{height:10px;border-radius:99px;background:var(--bg3);overflow:hidden;margin:.6rem 0 1.2rem}
+.meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--red),var(--amber),var(--green));transition:width .6s}
+.resp{font-size:1rem;min-height:14rem;white-space:pre-line}
+.resp .tag{font-size:.72rem;text-transform:uppercase;letter-spacing:.14em;font-weight:700;color:var(--muted);display:block;margin-bottom:.5rem}
+@media (max-width:900px){.pedir{grid-template-columns:1fr}}
+
+/* Anatomy */
+.anat-sw{margin-top:2rem}
+.anat{display:flex;height:120px;margin-top:1rem;border-radius:18px;overflow:hidden;gap:3px}
+.anat div{position:relative;padding:1rem;display:flex;flex-direction:column;justify-content:space-between;background:var(--bg2);border:1px solid var(--line);transform-origin:left;transform:scaleX(0);transition:transform .9s cubic-bezier(.2,.7,.2,1)}
+.anat.in div{transform:none}
+.anat div b{font-family:"Fraunces",serif;font-size:1.8rem;line-height:1}
+.anat div span{font-size:.85rem;font-weight:600;color:var(--muted)}
+.anat div.hot{background:var(--goldsoft);border-color:var(--gold)}
+.anat div.hot b{color:var(--gold)}
+.rules{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.6rem}
+.rules div{padding:1rem 1.2rem;border-left:2px solid var(--gold);background:var(--bg2);border-radius:0 14px 14px 0}
+.rules b{display:block;margin-bottom:.2rem}
+.rules span{color:var(--muted);font-size:.92rem}
+@media (max-width:760px){.anat{height:auto;flex-direction:column}.anat div{flex:auto!important;transform-origin:top}.rules{grid-template-columns:1fr}}
+
+/* Cronograma */
+.gen{display:flex;flex-wrap:wrap;gap:1rem 1.4rem;align-items:flex-end;margin-top:2rem}
+.field{display:flex;flex-direction:column;gap:.35rem}
+.field label,.flabel{font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.field input,.field select{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:.65rem .9rem;min-height:48px}
+.days{display:flex;gap:.35rem;flex-wrap:wrap}
+.days label{cursor:pointer}
+.days input{position:absolute;opacity:0;pointer-events:none}
+.days span{display:grid;place-items:center;width:48px;height:48px;border-radius:12px;border:1px solid var(--line);background:var(--bg2);font-weight:700;font-size:.85rem}
+.days input:checked+span{background:var(--gold);color:#1a1206;border-color:var(--gold)}
+.days input:focus-visible+span{outline:3px solid var(--gold);outline-offset:2px}
+.range{margin-top:1.2rem;font-weight:600}
+.range b{color:var(--gold)}
+#crono{height:560vh}
+#crono .stick{flex-direction:column;align-items:stretch;justify-content:center;padding:0}
+.crono-top{padding:0 max(6vw,18px);max-width:calc(1180px + 12vw);margin:0 auto;width:100%}
+.crono-top h2{font-size:clamp(2rem,4vw,3.4rem);margin-bottom:.4rem}
+.track{display:flex;gap:1.4rem;padding:2rem max(6vw,18px) 1rem;will-change:transform}
+.sess{flex:0 0 min(430px,82vw);background:var(--bg2);border:1px solid var(--line);border-radius:26px;padding:1.6rem;display:flex;flex-direction:column;gap:.8rem;position:relative;overflow:hidden}
+.sess::after{content:attr(data-n);position:absolute;right:-.5rem;top:-2.2rem;font-family:"Fraunces",serif;font-size:10rem;line-height:1;color:var(--gold);opacity:.08;pointer-events:none}
+.sess .date{display:flex;justify-content:space-between;font-size:.82rem;font-weight:700;color:var(--gold);letter-spacing:.06em;text-transform:uppercase}
+.sess h3{font-size:1.9rem}
+.sess .obj{color:var(--muted)}
+.sess ul{list-style:none;display:flex;flex-direction:column;gap:.4rem;font-size:.95rem}
+.sess li::before{content:"→ ";color:var(--gold);font-weight:700}
+.sess .mission{margin-top:auto;padding:.9rem 1rem;border-radius:14px;background:var(--goldsoft);font-size:.92rem}
+.sess .mission b{display:block;font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+.sess .tool{font-size:.8rem;color:var(--muted)}
+.crono-bar{margin:0 max(6vw,18px);height:3px;background:var(--line);border-radius:3px;overflow:hidden;max-width:1180px}
+.crono-bar i{display:block;height:100%;width:0;background:var(--gold)}
+@media (max-width:860px),(max-height:620px){
+  #crono{height:auto}
+  #crono .stick{position:relative;height:auto;padding:12vh 0 6vh}
+  .track{flex-direction:column;transform:none!important}
+  .sess{flex:auto}
+  .crono-bar{display:none}
+}
+.sess .when{display:flex;flex-direction:column;gap:.3rem;font-size:.85rem;font-weight:600}
+.sess .when span{display:flex;gap:.5rem;align-items:center}
+.sess .when i{font-style:normal;font-size:.7rem;font-weight:800;padding:.15rem .45rem;border-radius:6px;background:var(--gold);color:#1a1206}
+.sess .when i.b{background:var(--bg3);color:var(--ink);border:1px solid var(--line)}
+.sess .phase{font-size:.72rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.sess .hito{font-size:.82rem;font-weight:700;color:var(--gold)}
+.seg2{display:inline-flex;background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:4px;gap:4px}
+.seg2 button{border:0;background:none;border-radius:10px;padding:.55rem .9rem;font-weight:700;min-height:40px}
+.seg2 button[aria-pressed="true"]{background:var(--gold);color:#1a1206}
+.hint{font-size:.8rem;color:var(--muted);margin-top:.3rem}
+
+/* Temario overview */
+.months{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin-top:2.4rem}
+.month{background:var(--bg2);border:1px solid var(--line);border-radius:24px;padding:1.6rem;position:relative;overflow:hidden}
+.month .mn{font-family:"Fraunces",serif;font-size:5rem;line-height:.8;color:var(--gold);opacity:.9}
+.month h3{font-size:1.7rem;margin:.6rem 0 .2rem}
+.month .q{color:var(--muted);font-style:italic;margin-bottom:1rem}
+.month ol{list-style:none;display:flex;flex-direction:column;gap:.35rem}
+.month li button{width:100%;text-align:left;background:none;border:1px solid transparent;border-radius:12px;padding:.55rem .7rem;display:flex;gap:.7rem;align-items:baseline;font-weight:600}
+.month li button:hover{border-color:var(--gold);background:var(--goldsoft)}
+.month li b{font-family:"Fraunces",serif;color:var(--gold);min-width:1.6rem;font-weight:500}
+.month li small{margin-left:auto;font-size:.9rem}
+.evalbar{display:flex;height:64px;border-radius:14px;overflow:hidden;gap:3px;margin-top:1rem}
+.evalbar div{display:flex;flex-direction:column;justify-content:center;padding:0 .8rem;background:var(--bg2);border:1px solid var(--line);font-size:.78rem;font-weight:600;color:var(--muted);min-width:0}
+.evalbar div b{font-family:"Fraunces",serif;font-size:1.3rem;color:var(--ink);font-weight:500}
+.tm-foot{display:grid;grid-template-columns:1.4fr 1fr;gap:1.6rem;margin-top:2rem;align-items:end}
+.tm-foot .btns{display:flex;gap:.7rem;flex-wrap:wrap;justify-content:flex-end}
+@media (max-width:900px){.months{grid-template-columns:1fr}.tm-foot{grid-template-columns:1fr}.tm-foot .btns{justify-content:flex-start}.evalbar{height:auto;flex-direction:column}.evalbar div{flex:auto!important;padding:.6rem .8rem;flex-direction:row;justify-content:space-between;align-items:center}}
+
+/* Drawer */
+#drawer{position:fixed;top:0;right:0;bottom:0;width:min(600px,100vw);z-index:80;background:var(--bg);border-left:1px solid var(--line);box-shadow:var(--shadow);transform:translateX(105%);transition:transform .5s cubic-bezier(.2,.7,.2,1);display:flex;flex-direction:column;visibility:hidden}
+#drawer.open{transform:none;visibility:visible}
+#scrim{position:fixed;inset:0;z-index:79;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .4s}
+#scrim.open{opacity:1;pointer-events:auto}
+.dr-head{padding:1.4rem 1.6rem 1rem;border-bottom:1px solid var(--line)}
+.dr-head .top{display:flex;justify-content:space-between;align-items:center;gap:1rem}
+.dr-head h2{font-size:2rem;margin:0}
+.dr-close{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--bg2);font-size:1.3rem;flex:none}
+.dr-filters{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:1rem}
+.dr-filters button{border:1px solid var(--line);background:var(--bg2);border-radius:999px;padding:.45rem .9rem;font-weight:700;font-size:.85rem}
+.dr-filters button[aria-pressed="true"]{background:var(--gold);color:#1a1206;border-color:var(--gold)}
+.dr-body{flex:1;overflow-y:auto;padding:1rem 1.6rem 2rem;overscroll-behavior:contain}
+.dr-month{font-size:.72rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin:1.6rem 0 .6rem}
+.wk{border:1px solid var(--line);border-radius:18px;margin-bottom:.7rem;background:var(--bg2);overflow:hidden}
+.wk summary{list-style:none;cursor:pointer;padding:1rem 1.2rem;display:flex;gap:.9rem;align-items:center}
+.wk summary::-webkit-details-marker{display:none}
+.wk summary b{font-family:"Fraunces",serif;font-size:1.6rem;color:var(--gold);min-width:2rem;font-weight:500}
+.wk summary span{flex:1;font-weight:700;font-size:1.05rem;line-height:1.3}
+.wk summary span small{display:block;font-weight:600;color:var(--muted);font-size:.78rem;margin-top:.15rem}
+.wk summary::after{content:"+";font-size:1.4rem;color:var(--muted);transition:transform .3s}
+.wk[open] summary::after{transform:rotate(45deg)}
+.wk[open]{border-color:color-mix(in srgb,var(--gold) 45%,transparent)}
+.wk .in{padding:0 1.2rem 1.2rem 4.1rem;display:flex;flex-direction:column;gap:.9rem}
+.wk h4{font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:.3rem}
+.wk ul{padding-left:1.1rem;display:flex;flex-direction:column;gap:.25rem}
+.wk .box{padding:.8rem 1rem;border-radius:12px;background:var(--goldsoft)}
+.wk .box.lab{background:var(--bg3)}
+@media (max-width:560px){.wk .in{padding-left:1.2rem}}
+
+/* Casos */
+.cases{display:grid;grid-template-columns:18rem 1fr;gap:1.6rem;margin-top:2.4rem}
+.ctabs{display:flex;flex-direction:column;gap:.5rem}
+.ctabs button{text-align:left;padding:1rem 1.2rem;border-radius:16px;border:1px solid var(--line);background:var(--bg2);font-weight:600;display:flex;justify-content:space-between;align-items:center}
+.ctabs button[aria-selected="true"]{border-color:var(--gold);background:var(--goldsoft)}
+.ctabs button small{color:var(--gold);font-weight:700}
+.cview{position:relative}
+.switch{display:inline-flex;background:var(--bg3);border-radius:999px;padding:4px;margin-bottom:1.4rem;position:relative}
+.switch button{border:0;background:none;padding:.6rem 1.4rem;border-radius:999px;font-weight:700;position:relative;z-index:1;transition:color .3s}
+.switch .pill{position:absolute;top:4px;bottom:4px;left:4px;width:calc(50% - 4px);border-radius:999px;background:var(--ink);transition:transform .45s cubic-bezier(.2,.7,.2,1)}
+.switch.ai .pill{transform:translateX(100%);background:var(--gold)}
+.switch button.act{color:var(--bg)}
+.cmin{font-family:"Fraunces",serif;font-size:clamp(4rem,9vw,7.5rem);line-height:1;font-variant-numeric:tabular-nums}
+.cmin small{font-size:.3em;color:var(--muted)}
+.cbar{height:14px;border-radius:99px;background:var(--bg3);margin:1rem 0 1.6rem;overflow:hidden}
+.cbar i{display:block;height:100%;background:var(--muted);border-radius:99px;transition:width .8s cubic-bezier(.2,.7,.2,1),background .5s}
+.switch.ai~.cbar i{background:var(--gold)}
+.steps{list-style:none;counter-reset:s;display:flex;flex-direction:column;gap:.6rem}
+.steps li{counter-increment:s;display:flex;gap:.8rem;align-items:baseline;animation:fade .5s both}
+.steps li::before{content:counter(s);font-family:"Fraunces",serif;color:var(--gold);font-size:1.2rem;min-width:1.2rem}
+.steps li em{color:var(--muted);font-style:normal;font-size:.85rem;margin-left:auto;white-space:nowrap}
+.saved-badge{display:inline-block;margin-top:1.4rem;padding:.6rem 1rem;border-radius:12px;background:var(--goldsoft);color:var(--gold);font-weight:700;opacity:0;transition:.5s}
+.saved-badge.on{opacity:1}
+@media (max-width:860px){.cases{grid-template-columns:1fr}.ctabs{flex-direction:row;overflow-x:auto;padding-bottom:.3rem}.ctabs button{flex:none}}
+
+/* Medidor */
+.med{display:grid;grid-template-columns:1.45fr 1fr;gap:1.6rem;margin-top:2.2rem;align-items:start}
+.medbar{display:flex;flex-wrap:wrap;gap:.8rem;align-items:flex-end;margin-bottom:1.2rem}
+.medbar .field{flex:1 1 11rem}
+table.mt{width:100%;border-collapse:collapse}
+.mt th{font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:left;padding:.4rem .3rem;font-weight:700}
+.mt td{padding:.3rem}
+.mt input{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:.55rem .6rem;min-height:44px}
+.mt input[type=number]{text-align:right;font-variant-numeric:tabular-nums}
+.mt td.sv{font-weight:700;color:var(--gold);text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.mt .del{border:0;background:none;color:var(--muted);font-size:1.3rem;width:36px;height:36px;border-radius:50%}
+.mt .del:hover{color:var(--red);background:var(--bg3)}
+.results{position:sticky;top:12vh}
+.ring{position:relative;width:220px;height:220px;margin:0 auto 1rem}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:14}
+.ring .bgc{stroke:var(--bg3)}
+.ring .fg{stroke:var(--gold);stroke-linecap:round;transition:stroke-dashoffset .8s cubic-bezier(.2,.7,.2,1)}
+.ring .c{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.ring .c b{font-family:"Fraunces",serif;font-size:3rem;line-height:1}
+.ring .c span{font-size:.75rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.1em}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
+.kpi{background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:1rem}
+.kpi b{display:block;font-family:"Fraunces",serif;font-size:1.9rem;line-height:1.1;font-variant-numeric:tabular-nums}
+.kpi span{font-size:.78rem;color:var(--muted);font-weight:600}
+.kpi.big{grid-column:span 2;background:var(--goldsoft);border-color:color-mix(in srgb,var(--gold) 40%,transparent)}
+.kpi.big b{color:var(--gold);font-size:2.4rem}
+.privacy{display:flex;gap:.6rem;align-items:center;font-size:.82rem;color:var(--muted);margin-top:1rem}
+.medactions{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1rem}
+@media (max-width:960px){.med{grid-template-columns:1fr}.results{position:static}}
+@media (max-width:760px){
+  .mt thead{display:none}
+  .mt tr{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:.3rem;padding:.6rem 0;border-bottom:1px solid var(--line)}
+  .mt td:first-child{grid-column:1/-1}
+  .mt td.sv{grid-column:1/4;text-align:left;align-self:center}
+}
+
+/* Semáforo */
+.lights{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin-top:2.4rem}
+.light{border-radius:24px;padding:1.6rem;background:var(--bg2);border:1px solid var(--line);position:relative;overflow:hidden}
+.light .bulb{width:64px;height:64px;border-radius:50%;margin-bottom:1rem;background:var(--c);box-shadow:0 0 0 8px color-mix(in srgb,var(--c) 18%,transparent),0 0 50px var(--c);opacity:.25;transition:opacity .6s}
+.light.in .bulb{opacity:1}
+.light h3{font-size:1.6rem;margin-bottom:.8rem}
+.light ul{list-style:none;display:flex;flex-direction:column;gap:.55rem}
+.light li{padding-left:1.2rem;position:relative}
+.light li::before{content:"";position:absolute;left:0;top:.6em;width:7px;height:7px;border-radius:50%;background:var(--c)}
+.g{--c:var(--green)}.y{--c:var(--amber)}.r{--c:var(--red)}
+.keyword{margin-top:2rem;display:grid;grid-template-columns:auto 1fr;gap:1.6rem;align-items:center;padding:1.8rem;border-radius:24px;border:1.5px dashed var(--gold)}
+.keyword .kw{font-family:"Fraunces",serif;font-size:2.4rem;font-style:italic;color:var(--gold);filter:blur(7px);transition:filter .5s;cursor:pointer;user-select:none}
+.keyword .kw:hover,.keyword .kw:focus{filter:none}
+@media (max-width:860px){.lights{grid-template-columns:1fr}.keyword{grid-template-columns:1fr}}
+
+/* Cierre */
+#cierre{text-align:center;align-items:center;overflow:hidden}
+#cierre h2{font-size:clamp(2.8rem,8vw,7rem);max-width:14ch;margin:0 auto 1.6rem}
+#cierre .grp{font-size:1.2rem;color:var(--muted)}
+#cierre .grp b{color:var(--gold);font-family:"Fraunces",serif;font-size:2.2rem;display:block}
+.sand{width:90px;margin:0 auto 2rem;display:block}
+.sand .s{fill:var(--gold)}
+.foot{margin-top:3rem;font-size:.8rem;color:var(--muted)}
+
+/* Oportunidad local */
+.local{display:grid;grid-template-columns:1.35fr 1fr;gap:1.6rem;margin-top:2.2rem;align-items:start}
+.bars{display:flex;flex-direction:column;gap:.7rem}
+.brow{display:grid;grid-template-columns:9.5rem 1fr 3.6rem;gap:.8rem;align-items:center;font-weight:600}
+.brow .bt{height:26px;border-radius:7px;background:var(--bg3);overflow:hidden}
+.brow .bf{height:100%;width:var(--w);background:color-mix(in srgb,var(--muted) 70%,var(--bg2));border-radius:7px;transform-origin:left;transform:scaleX(0);transition:transform 1.2s cubic-bezier(.2,.7,.2,1)}
+.bars.in .bf{transform:scaleX(1)}
+.brow.world .bf{background:repeating-linear-gradient(135deg,var(--muted) 0 5px,transparent 5px 10px)}
+.brow.ve{color:var(--gold)}
+.brow.ve .bf{background:var(--gold);box-shadow:0 0 18px var(--gold)}
+.brow .bv{text-align:right;font-variant-numeric:tabular-nums}
+.src{font-size:.78rem;color:var(--muted);margin-top:1rem}
+.src a{color:inherit}
+.age h3{font-size:1.4rem;margin-bottom:.8rem}
+.jump{display:flex;align-items:baseline;gap:.8rem;margin:.4rem 0 1rem;flex-wrap:wrap}
+.jump b{font-family:"Fraunces",serif;font-size:3.2rem;line-height:1;font-weight:500}
+.jump b.hi{color:var(--gold)}
+.jump span{color:var(--muted);font-weight:600;font-size:.9rem}
+.lesson{margin-top:1rem;padding:.9rem 1rem;border-radius:14px;background:var(--goldsoft);font-weight:600}
+.real{margin-top:1.4rem;display:grid;grid-template-columns:auto 1fr;gap:1.2rem;align-items:center;padding:1.3rem 1.5rem;border:1px dashed var(--line);border-radius:20px}
+.real .big{font-family:"Fraunces",serif;font-size:2.6rem;line-height:1;color:var(--gold);white-space:nowrap}
+.scam{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.6rem}
+.scam div{padding:1.1rem 1.2rem;border-radius:18px;background:var(--bg2);border:1px solid var(--line)}
+.scam b{display:block;font-family:"Fraunces",serif;font-size:2.1rem;line-height:1.05;color:var(--red);font-weight:500;margin-bottom:.4rem}
+.scam cite{display:block;font-style:normal;font-size:.75rem;color:var(--muted);margin-top:.5rem}
+.refs{margin-top:2rem;display:grid;grid-template-columns:1fr 1fr;gap:.6rem 2rem;list-style:none;counter-reset:r}
+.refs li{counter-increment:r;display:grid;grid-template-columns:2rem 1fr;gap:.6rem;padding:.7rem 0;border-bottom:1px solid var(--line);font-size:.92rem}
+.refs li::before{content:counter(r);font-family:"Fraunces",serif;color:var(--gold);font-size:1.2rem}
+.refs a{color:var(--ink);text-decoration-color:var(--gold);text-underline-offset:3px}
+.refs small{display:block;color:var(--muted);margin-top:.15rem}
+.lvl{display:inline-block;font-size:.66rem;font-weight:800;letter-spacing:.08em;padding:.1rem .45rem;border-radius:6px;margin-left:.3rem;vertical-align:middle}
+.lvl.a{background:color-mix(in srgb,var(--green) 22%,transparent);color:var(--green)}
+.lvl.b{background:color-mix(in srgb,var(--amber) 22%,transparent);color:var(--amber)}
+.lvl.c{background:color-mix(in srgb,var(--red) 18%,transparent);color:var(--red)}
+.legend{display:flex;gap:1rem;flex-wrap:wrap;margin-top:1rem;font-size:.85rem;color:var(--muted)}
+@media (max-width:900px){.local{grid-template-columns:1fr}.scam{grid-template-columns:1fr}.refs{grid-template-columns:1fr}}
+@media (max-width:560px){.brow{grid-template-columns:6.8rem 1fr 3rem;font-size:.85rem;gap:.5rem}.real{grid-template-columns:1fr}.jump b{font-size:2.6rem}}
+
+/* Teléfono */
+.nojs-msg{position:sticky;top:0;z-index:90;background:var(--gold);color:#1a1206;padding:1rem 1.2rem;font-weight:600;text-align:center}
+@media (max-width:700px){
+  .controls{top:auto;bottom:calc(12px + env(safe-area-inset-bottom));right:12px;left:12px;justify-content:center}
+  .controls button{height:46px;min-width:46px;font-size:.9rem;box-shadow:0 8px 30px -8px rgba(0,0,0,.5)}
+  #fMinus,#fsBtn{display:none}
+  .slide{padding:10vh 18px calc(96px + env(safe-area-inset-bottom))}
+  .pin>.stick{padding:0 18px}
+  #hero{padding:0 18px}
+  .cue{bottom:calc(84px + env(safe-area-inset-bottom));font-size:.78rem}
+  #hero h1{font-size:clamp(3.2rem,17vw,5rem)}
+  h2{font-size:clamp(2.1rem,10vw,2.8rem)}
+  .kicker{font-size:.7rem;letter-spacing:.16em}
+  .card{padding:1.2rem;border-radius:18px}
+  .stats{grid-template-columns:1fr 1fr;gap:1.4rem 1rem}
+  .stat .n{font-size:2.8rem}
+  .stat p{font-size:.92rem}
+  .insight{flex-direction:column;gap:.4rem;padding:1.1rem}
+  .zone{padding:1.4rem}
+  .zone.no{padding-left:1.4rem}
+  .letter{min-width:0;flex:1 1 calc(33% - .7rem);padding:.8rem .6rem}
+  .letter b{font-size:2rem}
+  .letter span{font-size:.72rem}
+  .gen{gap:1rem}
+  .gen .field{width:100%}
+  .gen .field input{width:100%}
+  .gen .btn{width:100%;justify-content:center}
+  .seg2{width:100%}
+  .seg2 button{flex:1;font-size:.82rem;padding:.55rem .4rem}
+  .days span{width:calc((100vw - 36px - 1.75rem) / 6);max-width:52px}
+  .sess{padding:1.3rem}
+  .sess h3{font-size:1.55rem}
+  .cmin{font-size:4rem}
+  .switch{width:100%}.switch button{flex:1}
+  .steps li{flex-wrap:wrap}
+  .medbar .field{flex:1 1 100%}
+  .medactions .btn{flex:1 1 calc(50% - .6rem);justify-content:center;font-size:.85rem;padding:.7rem .6rem}
+  .ring{width:180px;height:180px}
+  .kpi b{font-size:1.5rem}.kpi.big b{font-size:2rem}
+  .keyword{padding:1.3rem}
+  .keyword .kw{font-size:1.9rem}
+  .light{padding:1.3rem}
+  #cierre h2{font-size:clamp(2.4rem,12vw,3.6rem)}
+  .dr-head{padding:calc(1rem + env(safe-area-inset-top)) 1.1rem .9rem}
+  .dr-body{padding:.8rem 1.1rem calc(2rem + env(safe-area-inset-bottom))}
+  .dr-filters{flex-wrap:nowrap;overflow-x:auto;padding-bottom:.2rem}
+  .dr-filters button{flex:none}
+}
+@media (max-width:760px){
+  .mt td[data-l]::before{content:attr(data-l);display:block;font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:.2rem}
+  .mt td.sv::before{display:inline;margin-right:.4rem}
+}
+
+/* Print schedule */
+#printSheet{display:none}
+@media print{
+  body *{visibility:hidden}
+  body::before{display:none}
+  #printSheet,#printSheet *{visibility:visible}
+  #printSheet{display:block;position:absolute;left:0;top:0;width:100%;color:#000;font-family:Georgia,serif;padding:24px}
+  #printSheet h1{font-size:26px;margin-bottom:4px}
+  #printSheet table{width:100%;border-collapse:collapse;margin-top:16px;font-size:13px}
+  #printSheet th,#printSheet td{border:1px solid #999;padding:8px;text-align:left;vertical-align:top}
+  #printSheet th{background:#eee}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .js .rv{opacity:1;transform:none;transition:none}
+  #hero h1 .w{animation:none;opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+<noscript><div class="nojs-msg">Esta vista no ejecuta la parte interactiva. En el iPhone, ábrala en Safari o Chrome para verla completa.</div></noscript>
+<div id="bar"></div>
+
+<div class="controls" aria-label="Controles de presentación">
+  <button id="tmBtn" title="Temario completo (T)" aria-label="Abrir temario">📖 Temario</button>
+  <button id="fMinus" title="Letra más pequeña" aria-label="Letra más pequeña">A−</button>
+  <button id="fPlus" title="Letra más grande" aria-label="Letra más grande">A+</button>
+  <button id="themeBtn" title="Cambiar tema claro/oscuro" aria-label="Cambiar tema">◐</button>
+  <button id="fsBtn" title="Pantalla completa (F)" aria-label="Pantalla completa">⛶</button>
+</div>
+<nav id="dots" aria-label="Secciones"></nav>
+<div id="hud" aria-hidden="true">
+  <svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="17" fill="none" stroke="var(--line)" stroke-width="3"/><circle id="hudRing" cx="20" cy="20" r="17" fill="none" stroke="var(--gold)" stroke-width="3" stroke-linecap="round" stroke-dasharray="106.8" stroke-dashoffset="106.8" transform="rotate(-90 20 20)"/><line id="hudHand" x1="20" y1="20" x2="20" y2="9" stroke="var(--ink)" stroke-width="2" stroke-linecap="round"/></svg>
+  <div><div class="l1" id="hudIdx">01 / 12</div><div class="l2" id="hudName">Inicio</div></div>
+</div>
+
+<!-- 1 · HERO -->
+<section id="hero" data-title="Inicio">
+  <div class="glow"></div>
+  <svg id="bigclock" viewBox="-300 -300 600 600" aria-hidden="true">
+    <circle r="286" fill="none" stroke="var(--line)" stroke-width="1.5"/>
+    <circle r="230" fill="none" stroke="var(--line)" stroke-width="1"/>
+    <g id="ticks"></g>
+    <g id="nums" font-family="Fraunces" font-size="30" fill="var(--muted)" text-anchor="middle" dominant-baseline="central"></g>
+    <path id="sweep" fill="var(--goldsoft)"/>
+    <line id="hHand" x1="0" y1="18" x2="0" y2="-150" stroke="var(--ink)" stroke-width="9" stroke-linecap="round"/>
+    <line id="mHand" x1="0" y1="26" x2="0" y2="-225" stroke="var(--gold)" stroke-width="5" stroke-linecap="round"/>
+    <circle r="11" fill="var(--gold)"/><circle r="4" fill="var(--bg)"/>
+  </svg>
+  <div class="hero-in">
+    <div class="kicker">Programa de IA práctica · 3 meses · 13 semanas</div>
+    <h1><span class="w" style="animation-delay:.1s">Recupere</span> <span class="w" style="animation-delay:.25s">su</span> <span class="w" style="animation-delay:.4s"><em>tiempo.</em></span></h1>
+    <p class="lead rv in" style="transition-delay:.8s">Inteligencia artificial para empresarios que construyeron todo sin ella. Sin tecnicismos, sin jerga, y con resultados que se miden en <b style="color:var(--ink)">horas devueltas</b> a su semana.</p>
+  </div>
+  <div class="cue"><b></b> Deslice hacia abajo o use las flechas del teclado</div>
+</section>
+
+<!-- 2 · SEMANA (pinned) -->
+<section id="week" class="pin" data-title="La semana" data-steps="3">
+  <div class="stick">
+    <div class="week-grid">
+      <div class="week-head">
+        <div class="kicker" id="wKick">El diagnóstico</div>
+        <h2 id="wTitle">Una semana cualquiera de un empresario.</h2>
+        <div class="bigcount"><span id="wCount">0</span><small>h</small></div>
+        <div class="countlbl" id="wLbl">en tareas repetitivas</div>
+      </div>
+      <div>
+        <div id="wRows"></div>
+        <p class="note">Escenario ilustrativo basado en ahorros de 25–40 % reportados por MIT y Harvard/BCG. En el curso, <b>cada alumno mide el suyo</b>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 · QUÉ ES LA IA -->
+<section class="slide" id="ia" data-title="¿Qué es la IA?">
+  <div class="wrap">
+    <div class="kicker rv">Sin tecnicismos</div>
+    <h2 class="rv d1">La IA no es un robot.<br>Es un <em>asistente</em> que conversa.</h2>
+    <div class="meta-grid">
+      <div class="card rv d1"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4.5 4.5-6.5 8-6.5s7 2 8 6.5"/></svg></div><h3>Un empleado nuevo brillante</h3><p>Sabe un poco de todo, trabaja las 24 horas y nunca se cansa. Pero no conoce su negocio: <b>hay que explicarle</b>.</p></div>
+      <div class="card rv d2"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 12h10M4 18h6"/><path d="M17 15l3 3-3 3"/></svg></div><h3>Un autocompletar gigante</h3><p>Predice la mejor palabra siguiente. Por eso escribe tan bien… y por eso <b>a veces inventa</b> con total seguridad.</p></div>
+      <div class="card rv d3"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v11H9l-5 4z"/></svg></div><h3>No es Google</h3><p>No se le busca: <b>se le conversa</b>. Se le pide, se le corrige y se le vuelve a pedir, como a una persona.</p></div>
+    </div>
+    <div class="chat" id="chat">
+      <div class="msg user"><span class="who">Usted · por voz</span><span id="cU"></span></div>
+      <div class="msg ai"><span class="who">Asistente de IA</span><span id="cA"></span></div>
+      <div class="chat-foot" id="chatFoot">
+        <span class="chip">⏱ Con IA: 40 segundos</span>
+        <span class="chip" style="color:var(--muted)">Antes: 10 minutos pensando cómo decirlo</span>
+        <button class="btn" id="replay">↻ Repetir</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 · EVIDENCIA -->
+<section class="slide" id="evidencia" data-title="Evidencia">
+  <div class="wrap">
+    <div class="kicker rv">Lo que dice la investigación</div>
+    <h2 class="rv d1">No es una promesa.<br>Está <em>medido.</em></h2>
+    <div class="stats">
+      <div class="stat rv d1"><div class="n"><span data-count="40">0</span><sup>%</sup></div><p>menos tiempo en tareas de escritura, con 18 % más calidad.</p><cite>Noy &amp; Zhang · MIT · <i>Science</i>, 2023</cite></div>
+      <div class="stat rv d2"><div class="n"><span data-count="25">0</span><sup>%</sup></div><p>más rápido y 40 % mejor calidad en tareas donde la IA es fuerte.</p><cite>Harvard Business School y BCG, 2023</cite></div>
+      <div class="stat rv d3"><div class="n"><span data-count="34">0</span><sup>%</sup></div><p>más productivos los <b>menos experimentados</b>. Quien menos sabe, más gana.</p><cite>Stanford y MIT · NBER, 2023</cite></div>
+      <div class="stat rv d4"><div class="n"><span data-count="26">0</span><sup>min</sup></div><p>ahorrados al día por funcionario: unos 13 días laborales al año.</p><cite>Gobierno del Reino Unido, 20.000 funcionarios, 2025</cite></div>
+    </div>
+    <div class="real rv"><div class="big">2,2 h<small style="font-size:.4em;color:var(--muted)"> /sem</small></div><p><b>El promedio real es menor.</b> Repartido en toda la jornada, quienes usan IA en EE.UU. ahorran un 5,4 % de sus horas (Reserva Federal de St. Louis, 2024), y en Dinamarca cerca de un 3 % (NBER, 2025). El ahorro grande aparece cuando se usa a propósito en las tareas correctas. <b style="color:var(--gold)">Por eso en este curso se mide.</b></p></div>
+    <div class="insight rv"><p>La lección para usted: los mayores beneficios aparecen justamente en <b>correos, mensajes, documentos, informes y publicaciones</b>, las tareas que más horas le quitan a un dueño de negocio.</p></div>
+  </div>
+</section>
+
+<!-- 4b · OPORTUNIDAD LOCAL -->
+<section class="slide" id="local" data-title="Venezuela">
+  <div class="wrap">
+    <div class="kicker rv">La oportunidad en Venezuela</div>
+    <h2 class="rv d1">Solo 9 de cada 100<br><em>la usan.</em></h2>
+    <p class="lead rv d2">Porcentaje de personas en edad de trabajar que usan inteligencia artificial. Venezuela la usa a menos de la mitad del ritmo de Colombia o Chile: quien aprenda hoy, se adelanta.</p>
+    <div class="local">
+      <div class="card rv d2">
+        <div class="bars" id="bars">
+          <div class="brow"><span>Colombia</span><div class="bt"><div class="bf" style="--w:88%"></div></div><span class="bv">22,0 %</span></div>
+          <div class="brow"><span>Panamá</span><div class="bt"><div class="bf" style="--w:86%"></div></div><span class="bv">21,5 %</span></div>
+          <div class="brow"><span>Chile</span><div class="bt"><div class="bf" style="--w:83.2%"></div></div><span class="bv">20,8 %</span></div>
+          <div class="brow"><span>Argentina</span><div class="bt"><div class="bf" style="--w:78.4%"></div></div><span class="bv">19,6 %</span></div>
+          <div class="brow world"><span>Promedio mundial</span><div class="bt"><div class="bf" style="--w:75.2%"></div></div><span class="bv">18,8 %</span></div>
+          <div class="brow"><span>México</span><div class="bt"><div class="bf" style="--w:71.2%"></div></div><span class="bv">17,8 %</span></div>
+          <div class="brow"><span>Brasil</span><div class="bt"><div class="bf" style="--w:68.4%"></div></div><span class="bv">17,1 %</span></div>
+          <div class="brow ve"><span>Venezuela</span><div class="bt"><div class="bf" style="--w:36%"></div></div><span class="bv">9,0 %</span></div>
+        </div>
+        <p class="src">Escala de 0 a 25 %. Fuente: Microsoft AI Economy Institute, <i>Global AI Adoption in 2025</i> (2.º semestre de 2025). Promedio mundial: junio de 2026.</p>
+      </div>
+      <div class="card age rv d3">
+        <h3>Los mayores ya se están sumando</h3>
+        <div class="flabel">Mayores de 65 que han usado un chatbot de IA</div>
+        <div class="jump"><b>10 %</b><span>2025 →</span><b class="hi">23 %</b><span>2026</span></div>
+        <div class="flabel">…pero se sienten muy seguros usándolo</div>
+        <div class="jump"><b class="hi">6 %</b><span>apenas</span></div>
+        <p class="src" style="margin-top:0">Pew Research Center (EE.UU.), 2025 y 2026. En mayores de 50, AARP registra 9 % (2023) → 18 % (2024) → 30 % (2025).</p>
+        <p class="lesson">El interés existe. El freno es la confianza: por eso el primer mes del curso se llama <em>Confianza</em>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 · FRONTERA -->
+<section class="slide" id="frontera" data-title="La frontera">
+  <div class="wrap">
+    <div class="kicker rv">Honestidad ante todo</div>
+    <h2 class="rv d1">La frontera es <em>irregular.</em></h2>
+    <p class="lead rv d2">En el estudio de Harvard y BCG, quienes usaron la IA fuera de su zona fuerte acertaron <b style="color:var(--ink)">19 puntos menos</b> que quienes no la usaron. Saber dónde está la línea es la habilidad más importante.</p>
+    <div class="frontier rv" id="frontierBox">
+      <svg class="jag" viewBox="0 0 1000 430" preserveAspectRatio="none" aria-hidden="true"><path d="M520 0 L470 50 L545 95 L480 150 L560 205 L455 260 L530 310 L470 365 L540 430"/></svg>
+      <div class="zone ok">
+        <h3>Aquí brilla</h3><p>Úsela con confianza y revise.</p>
+        <ul><li><i>✓</i>Redactar y responder mensajes</li><li><i>✓</i>Resumir documentos largos</li><li><i>✓</i>Ordenar ideas y hacer listas</li><li><i>✓</i>Cambiar el tono de un texto</li><li><i>✓</i>Explicar temas difíciles</li><li><i>✓</i>Traducir</li></ul>
+      </div>
+      <div class="zone no">
+        <h3>Aquí tropieza</h3><p>Verifique siempre, o no la use.</p>
+        <ul><li><i>!</i>Cifras exactas y cálculos sin revisar</li><li><i>!</i>Noticias y datos de hoy</li><li><i>!</i>Leyes, impuestos y normas locales</li><li><i>!</i>Diagnósticos médicos</li><li><i>!</i>Citas, fuentes y referencias</li><li><i>!</i>Decisiones que requieren su criterio</li></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 · PEDIR -->
+<section class="slide" id="pedir" data-title="Método PEDIR">
+  <div class="wrap">
+    <div class="kicker rv">Una sola fórmula</div>
+    <h2 class="rv d1">Para que la IA le entienda,<br>solo tiene que <em>PEDIR.</em></h2>
+    <p class="lead rv d2">Toque cada letra y vea cómo mejora la respuesta. Así se le habla a un empleado nuevo muy inteligente que no conoce su negocio.</p>
+    <div class="pedir rv d2">
+      <div>
+        <div class="letters" id="letters"></div>
+        <div class="card prompt" id="promptBox"></div>
+      </div>
+      <div class="card">
+        <div class="flabel">Calidad de la respuesta</div>
+        <div class="meter"><i id="meterI"></i></div>
+        <div class="resp" id="respBox"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 7 · ANATOMÍA DE UNA CLASE -->
+<section class="slide" id="clase" data-title="Cada clase">
+  <div class="wrap">
+    <div class="kicker rv">Diseñado para adultos</div>
+    <h2 class="rv d1">Cada clase: 2 horas.<br><em>80 %</em> con las manos.</h2>
+    <p class="lead rv d2">La misma rutina en cada sesión da seguridad. Con una clase por semana se da la <b style="color:var(--ink)">Sesión A</b>; con dos, se suma la <b style="color:var(--ink)">Sesión B</b>: un laboratorio 100 % práctico con los correos, clientes y números reales de cada alumno.</p>
+    <div class="seg2 anat-sw rv d2" id="anatSw"><button aria-pressed="true" data-k="a">Sesión A · Clase</button><button aria-pressed="false" data-k="b">Sesión B · Laboratorio</button></div>
+    <div class="anat" id="anat"></div>
+    <div class="rules">
+      <div class="rv d1"><b>Una cosa a la vez</b><span>Nunca dos aplicaciones nuevas en la misma sesión.</span></div>
+      <div class="rv d2"><b>Voz antes que teclado</b><span>Se empieza hablándole a la IA desde el celular.</span></div>
+      <div class="rv d3"><b>Cero jerga</b><span>No decimos “prompt”: decimos <i>pedido</i>.</span></div>
+      <div class="rv d1"><b>Compañero de mesa</b><span>Nadie se queda atrás; se aprende en pareja.</span></div>
+      <div class="rv d2"><b>Recetas impresas</b><span>Cada paso en una tarjeta para llevar a casa.</span></div>
+      <div class="rv d3"><b>El error es la lección</b><span>Si la IA falla en vivo, mejor: así se aprende a revisar.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 8 · TEMARIO -->
+<section class="slide" id="temario" data-title="Temario">
+  <div class="wrap">
+    <div class="kicker rv">El temario completo</div>
+    <h2 class="rv d1">Tres meses.<br>Tres <em>etapas.</em></h2>
+    <p class="lead rv d2">De perder el miedo a ser autónomo. Toque cualquier semana para ver sus contenidos, la práctica, el laboratorio y la misión.</p>
+    <div class="months" id="months"></div>
+    <div class="tm-foot rv">
+      <div><div class="flabel">Evaluación</div><div class="evalbar" id="evalbar"></div></div>
+      <div class="btns"><button class="btn primary" id="tmOpen">📖 Ver temario completo</button><button class="btn" id="tmPrint">🖨 Imprimir temario</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- 9 · CRONOGRAMA -->
+<section class="slide" id="crono-gen" data-title="Cronograma" style="min-height:auto;padding-bottom:4vh">
+  <div class="wrap">
+    <div class="kicker rv">Generador de cronograma</div>
+    <h2 class="rv d1">Trece semanas.<br>Cientos de horas <em>de vuelta.</em></h2>
+    <p class="lead rv d2">Elija la modalidad, la fecha de inicio y los días de clase: el cronograma de los tres meses se calcula solo. Luego deslice para recorrerlo semana a semana.</p>
+    <div class="gen rv d2">
+      <div class="field"><span class="flabel">Modalidad</span><div class="seg2" id="gMode"><button data-m="1" aria-pressed="true">Esencial · 1/sem</button><button data-m="2" aria-pressed="false">Intensiva · 2/sem</button></div></div>
+      <div class="field"><label for="gStart">Inicio</label><input type="date" id="gStart"></div>
+      <div class="field"><label for="gTime">Hora</label><input type="time" id="gTime" value="18:00"></div>
+      <div class="field"><span class="flabel">Días de clase</span><div class="days" id="gDays"></div><span class="hint" id="gHint"></span></div>
+      <div class="field"><label for="gPlace">Lugar</label><input type="text" id="gPlace" placeholder="Sala, empresa o en línea" value=""></div>
+      <button class="btn primary" id="printBtn">🖨 Imprimir cronograma</button>
+    </div>
+    <p class="range rv" id="gRange"></p>
+  </div>
+</section>
+<section id="crono" class="pin" data-title="Las 13 semanas" data-steps="13">
+  <div class="stick">
+    <div class="crono-top"><div class="kicker">El recorrido</div></div>
+    <div class="track" id="track"></div>
+    <div class="crono-bar"><i id="cronoBar"></i></div>
+  </div>
+</section>
+
+<!-- 9 · CASOS -->
+<section class="slide" id="casos" data-title="Antes y después">
+  <div class="wrap">
+    <div class="kicker rv">Casos reales de negocio</div>
+    <h2 class="rv d1">La misma tarea.<br><em>Otro</em> reloj.</h2>
+    <div class="cases rv d2">
+      <div class="ctabs" role="tablist" id="ctabs"></div>
+      <div class="cview card" role="tabpanel" id="cview">
+        <div class="switch" id="sw"><span class="pill"></span><button id="swOff" class="act">Sin IA</button><button id="swOn">Con IA</button></div>
+        <div class="cmin"><span id="cMin">0</span> <small>minutos</small></div>
+        <div class="cbar"><i id="cBar"></i></div>
+        <ol class="steps" id="cSteps"></ol>
+        <div class="saved-badge" id="cSaved"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 10 · MEDIDOR -->
+<section class="slide" id="medidor" data-title="Medidor">
+  <div class="wrap">
+    <div class="kicker rv">El punto de medida</div>
+    <h2 class="rv d1">Lo que no se mide,<br>no se <em>recupera.</em></h2>
+    <p class="lead rv d2">Cada alumno anota sus tareas ancla: cuántas veces por semana, cuánto tarda hoy y cuánto tarda con IA (incluyendo revisar). Todo se guarda solo en este equipo.</p>
+    <div class="med rv d2">
+      <div class="card">
+        <div class="medbar">
+          <div class="field"><label for="mSel">Alumno</label><select id="mSel"></select></div>
+          <div class="field"><label for="mName">Nombre</label><input id="mName" type="text"></div>
+          <div class="field" style="flex:0 1 9rem"><label for="mRate">Valor de su hora (USD)</label><input id="mRate" type="number" min="0" step="1"></div>
+        </div>
+        <table class="mt">
+          <thead><tr><th>Tarea ancla</th><th>Veces/sem</th><th>Min antes</th><th>Min con IA</th><th style="text-align:right">Ahorro/sem</th><th></th></tr></thead>
+          <tbody id="mBody"></tbody>
+        </table>
+        <div class="medactions">
+          <button class="btn" id="mAdd">＋ Agregar tarea</button>
+          <button class="btn" id="mNew">👤 Nuevo alumno</button>
+          <button class="btn" id="mExport">⬇ Exportar CSV</button>
+          <button class="btn" id="mCopy">⧉ Copiar para Excel</button>
+          <button class="btn" id="mDelP" style="color:var(--red)">Eliminar alumno</button>
+        </div>
+        <p class="privacy">🔒 Los datos se guardan en el navegador de este equipo. No se envían a ningún servidor.</p>
+      </div>
+      <div class="card results">
+        <div class="ring"><svg viewBox="0 0 220 220"><circle class="bgc" cx="110" cy="110" r="96"/><circle class="fg" id="mRing" cx="110" cy="110" r="96" stroke-dasharray="603.2" stroke-dashoffset="603.2"/></svg><div class="c"><b id="mPct">0%</b><span>menos tiempo</span></div></div>
+        <div class="kpis">
+          <div class="kpi big"><b id="kYear">0 h</b><span>recuperadas al año</span></div>
+          <div class="kpi"><b id="kWeek">0 h</b><span>por semana</span></div>
+          <div class="kpi"><b id="kDays">0</b><span>días laborales al año</span></div>
+          <div class="kpi" style="grid-column:span 2"><b id="kMoney">$0</b><span>valor de su tiempo recuperado al año</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 11 · SEMÁFORO -->
+<section class="slide" id="semaforo" data-title="Seguridad">
+  <div class="wrap">
+    <div class="kicker rv">Usarla sin riesgos</div>
+    <h2 class="rv d1">El semáforo de la <em>confianza.</em></h2>
+    <p class="lead rv d2">Regla simple: lo que no diría en un grupo grande de WhatsApp, no se lo diga a la IA.</p>
+    <div class="lights">
+      <div class="light g rv d1"><div class="bulb"></div><h3>Sí, con tranquilidad</h3><ul><li>Redactar mensajes, ideas y publicaciones</li><li>Resumir textos públicos</li><li>Aprender y pedir explicaciones</li><li>Traducciones del día a día</li></ul></div>
+      <div class="light y rv d2"><div class="bulb"></div><h3>Con cuidado</h3><ul><li>Clientes: use iniciales o nombres ficticios</li><li>Números del negocio: sin cuentas ni nombres</li><li>Contratos: la IA explica, <b>el abogado decide</b></li><li>Salud: orienta, <b>el médico decide</b></li></ul></div>
+      <div class="light r rv d3"><div class="bulb"></div><h3>Nunca</h3><ul><li>Contraseñas y códigos de verificación</li><li>Tarjetas o cuentas bancarias completas</li><li>Cédulas y documentos de terceros</li><li>Secretos de socios o empleados</li></ul></div>
+    </div>
+    <div class="scam">
+      <div class="rv d1"><b>US$ 4.885 M</b>perdidos en estafas por internet por mayores de 60 en un solo año, el grupo más afectado.<cite>FBI, Internet Crime Report 2024 · EE.UU.</cite></div>
+      <div class="rv d2"><b>1 de cada 3</b>denuncias de fraude es por suplantación de identidad: US$ 3.500 M perdidos en 2025.<cite>FTC, 2026 · EE.UU.</cite></div>
+      <div class="rv d3"><b>70 %</b>no se siente capaz de distinguir una voz clonada de una real. El 77 % de las víctimas perdió dinero.<cite>McAfee, 7.054 personas en 7 países, 2023</cite></div>
+    </div>
+    <div class="keyword rv">
+      <div><div class="flabel">Palabra clave familiar</div><div class="kw" tabindex="0" title="Pase el cursor para revelar">“girasol azul”</div></div>
+      <p><b>Una voz o un video ya no son prueba.</b> Hoy se puede clonar la voz de un hijo con pocos segundos de audio. Si alguien “de la familia” o “un proveedor” pide dinero urgente: cuelgue, llame al número que usted conoce y pida la palabra clave acordada.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 11b · FUENTES -->
+<section class="slide" id="fuentes" data-title="Fuentes">
+  <div class="wrap">
+    <div class="kicker rv">Respaldo</div>
+    <h2 class="rv d1">Cada cifra tiene<br>su <em>fuente.</em></h2>
+    <p class="lead rv d2">Datos verificados en septiembre de 2026 contra los estudios y organismos originales. Toque cualquier fuente para abrirla.</p>
+    <div class="legend rv d2"><span><span class="lvl a">EXPERIMENTO</span> mide causa y efecto</span><span><span class="lvl b">ENCUESTA / OFICIAL</span> gran escala, datos reportados</span><span><span class="lvl c">ESTIMACIÓN</span> proyección, no medición</span></div>
+    <ol class="refs rv">
+      <li><div><a href="https://www.science.org/doi/10.1126/science.adh2586" target="_blank" rel="noopener">Noy y Zhang (2023). Experimental evidence on the productivity effects of generative AI. <i>Science</i>.</a><span class="lvl a">EXPERIMENTO</span><small>Escritura: −40 % de tiempo, +18 % de calidad</small></div></li>
+      <li><div><a href="https://www.hbs.edu/faculty/Pages/item.aspx?num=64700" target="_blank" rel="noopener">Dell’Acqua et al. (2023). Navigating the Jagged Technological Frontier. Harvard Business School y BCG.</a><span class="lvl a">EXPERIMENTO</span><small>758 consultores: 25,1 % más rápido; 19 puntos menos fuera de la frontera</small></div></li>
+      <li><div><a href="https://academic.oup.com/qje/article/140/2/889/7990658" target="_blank" rel="noopener">Brynjolfsson, Li y Raymond (2025). Generative AI at Work. <i>Quarterly Journal of Economics</i>.</a><span class="lvl a">EXPERIMENTO</span><small>5.179 agentes: +14 % en promedio, +34 % en novatos</small></div></li>
+      <li><div><a href="https://assets.publishing.service.gov.uk/media/683db42bd23a62e5d32680d0/M365_Copilot_Experiment_Findings_Report.pdf" target="_blank" rel="noopener">Government Digital Service (2025). M365 Copilot Experiment: Cross-Government Findings. Reino Unido.</a><span class="lvl b">ENCUESTA / OFICIAL</span><small>20.000 funcionarios: 26 minutos al día</small></div></li>
+      <li><div><a href="https://fredblog.stlouisfed.org/2026/08/does-generative-ai-save-time-at-work/" target="_blank" rel="noopener">Bick, Blandin y Deming. Reserva Federal de St. Louis (2024–2026).</a><span class="lvl b">ENCUESTA / OFICIAL</span><small>Ahorro promedio: 5,4 % de las horas entre usuarios</small></div></li>
+      <li><div><a href="https://bfi.uchicago.edu/working-papers/large-language-models-small-labor-market-effects/" target="_blank" rel="noopener">Humlum y Vestergaard (2025). Large Language Models, Small Labor Market Effects. NBER.</a><span class="lvl b">ENCUESTA / OFICIAL</span><small>Dinamarca, 25.000 empleados: ~3 % de ahorro</small></div></li>
+      <li><div><a href="https://www.mckinsey.com/capabilities/tech-and-ai/our-insights/the-economic-potential-of-generative-ai-the-next-productivity-frontier" target="_blank" rel="noopener">McKinsey Global Institute (2023). The economic potential of generative AI.</a><span class="lvl c">ESTIMACIÓN</span><small>Potencial técnico: 60–70 % del tiempo</small></div></li>
+      <li><div><a href="https://www.microsoft.com/en-us/worklab/work-trend-index/ai-at-work-is-here-now-comes-the-hard-part" target="_blank" rel="noopener">Microsoft y LinkedIn (2024). Work Trend Index.</a><span class="lvl b">ENCUESTA / OFICIAL</span><small>31.000 personas: 75 % ya usa IA en el trabajo</small></div></li>
+      <li><div><a href="https://www.microsoft.com/en-us/research/wp-content/uploads/2026/01/Microsoft-AI-Diffusion-Report-2025-H2.pdf" target="_blank" rel="noopener">Microsoft AI Economy Institute (2026). Global AI Adoption in 2025.</a><span class="lvl b">ENCUESTA / OFICIAL</span><small>Venezuela 9,0 %; Colombia 22,0 %</small></div></li>
+      <li><div><a href="https://datareportal.com/reports/digital-2025-venezuela" target="_blank" rel="noopener">DataReportal (2025). Digital 2025: Venezuela.</a><span class="lvl b">ENCUESTA / OFICIAL</span><small>17,5 millones de usuarios de internet (61,6 %)</small></div></li>
+      <li><div><a href="https://www.pewresearch.org/internet/2026/06/17/how-opinions-and-use-of-ai-differ-by-age/" target="_blank" rel="noopener">Pew Research Center (2026). How Americans’ opinions and use of AI differ by age.</a><span class="lvl b">ENCUESTA / OFICIAL</span><small>Mayores de 65: 23 % ha usado un chatbot</small></div></li>
+      <li><div><a href="https://www.aarp.org/pri/topics/technology/internet-media-devices/2026-technology-trends-older-adults/" target="_blank" rel="noopener">AARP (2025–2026). Tech Trends and Older Adults.</a><span class="lvl b">ENCUESTA / OFICIAL</span><small>Mayores de 50: 9 % → 18 % → 30 %</small></div></li>
+      <li><div><a href="https://www.semanticscholar.org/paper/Factors-predicting-the-use-of-technology:-findings-Czaja-Charness/bed7551bb0f97ff991b82d0aecedaa14a1ceca24" target="_blank" rel="noopener">Czaja et al. (2006). Factors predicting the use of technology. <i>Psychology and Aging</i>.</a><span class="lvl a">EXPERIMENTO</span><small>Ansiedad y autoeficacia pesan más que la edad</small></div></li>
+      <li><div><a href="https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0120644" target="_blank" rel="noopener">Murre y Dros (2015). Replication of Ebbinghaus’ Forgetting Curve. <i>PLOS ONE</i>.</a><span class="lvl a">EXPERIMENTO</span><small>Por qué hay misiones y repaso cada semana</small></div></li>
+      <li><div><a href="https://www.ic3.gov/AnnualReport/Reports/2024_IC3Report.pdf" target="_blank" rel="noopener">FBI (2025). 2024 Internet Crime Report.</a><span class="lvl b">ENCUESTA / OFICIAL</span><small>Mayores de 60: US$ 4.885 M en pérdidas</small></div></li>
+      <li><div><a href="https://www.ftc.gov/news-events/news/press-releases/2026/06/ftc-data-show-people-reported-losing-3-point-5-billion-imposter-scams-2025" target="_blank" rel="noopener">Federal Trade Commission (2026). Imposter scams 2025.</a><span class="lvl b">ENCUESTA / OFICIAL</span><small>US$ 3.500 M perdidos por suplantación</small></div></li>
+      <li><div><a href="https://www.mcafee.com/content/dam/consumer/en-us/resources/cybersecurity/artificial-intelligence/rp-beware-the-artificial-impostor-report.pdf" target="_blank" rel="noopener">McAfee (2023). Beware the Artificial Impostor.</a><span class="lvl b">ENCUESTA / OFICIAL</span><small>Voz clonada: 77 % de las víctimas perdió dinero</small></div></li>
+    </ol>
+  </div>
+</section>
+
+<!-- 12 · CIERRE -->
+<section class="slide" id="cierre" data-title="Cierre">
+  <svg class="sand rv" viewBox="0 0 90 140" aria-hidden="true"><path d="M8 4h74M8 136h74" stroke="var(--ink)" stroke-width="5" stroke-linecap="round"/><path d="M16 8c0 34 26 44 26 62S16 98 16 132h58c0-34-26-44-26-62S74 42 74 8" fill="none" stroke="var(--muted)" stroke-width="3"/><path class="s" d="M24 132c4-18 14-24 21-26 7 2 17 8 21 26z"/><rect class="s" x="43.5" y="70" width="3" height="36" rx="1.5"><animate attributeName="opacity" values="1;.3;1" dur="1.6s" repeatCount="indefinite"/></rect></svg>
+  <div class="kicker rv" style="justify-content:center">Para terminar</div>
+  <h2 class="rv d1">El tiempo no se compra.<br>Se <em>recupera.</em></h2>
+  <p class="grp rv d2">Tiempo recuperado por este grupo al año<b id="grpTotal">0 horas</b></p>
+  <p class="foot rv d3">Presentación interactiva · Use ← → o ↑ ↓ para avanzar · T para el temario · F para pantalla completa</p>
+</section>
+
+<div id="scrim"></div>
+<aside id="drawer" aria-label="Temario completo" aria-hidden="true">
+  <div class="dr-head">
+    <div class="top"><div><div class="kicker" style="margin-bottom:.4rem">3 meses · 13 semanas</div><h2>Temario</h2></div><button class="dr-close" id="drClose" aria-label="Cerrar temario">×</button></div>
+    <div class="dr-filters" id="drFilters"><button data-f="0" aria-pressed="true">Todo</button><button data-f="1" aria-pressed="false">Mes 1 · Confianza</button><button data-f="2" aria-pressed="false">Mes 2 · Productividad</button><button data-f="3" aria-pressed="false">Mes 3 · Dominio</button></div>
+  </div>
+  <div class="dr-body" id="drBody"></div>
+</aside>
+
+<div id="printSheet"></div>
+
+<script>
+(() => {
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+};
+
+/* Controls */
+let scale = store.get('ia.scale', 1);
+const applyScale = () => document.documentElement.style.setProperty('--scale', scale);
+applyScale();
+$('#fPlus').onclick = () => { scale = Math.min(1.5, +(scale + .1).toFixed(2)); applyScale(); store.set('ia.scale', scale); layout(); };
+$('#fMinus').onclick = () => { scale = Math.max(.8, +(scale - .1).toFixed(2)); applyScale(); store.set('ia.scale', scale); layout(); };
+const theme = store.get('ia.theme', null);
+if (theme) document.documentElement.dataset.theme = theme;
+$('#themeBtn').onclick = () => {
+  const cur = document.documentElement.dataset.theme || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+  const next = cur === 'light' ? 'dark' : 'light';
+  document.documentElement.dataset.theme = next; store.set('ia.theme', next);
+};
+if (!theme && matchMedia('(prefers-color-scheme: light)').matches) document.documentElement.dataset.theme = 'light';
+const toggleFs = () => document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.();
+$('#fsBtn').onclick = toggleFs;
+if (!document.fullscreenEnabled) $('#fsBtn').style.display = 'none';
+
+/* Sections / dots */
+const sections = $$('body > section');
+const dots = $('#dots');
+sections.forEach((s, i) => {
+  const a = document.createElement('a');
+  a.href = '#' + s.id; a.innerHTML = `<span>${s.dataset.title}</span><i></i>`;
+  a.setAttribute('aria-label', s.dataset.title);
+  dots.appendChild(a);
+});
+
+/* Hero clock */
+const ticks = $('#ticks'), nums = $('#nums');
+for (let i = 0; i < 60; i++) {
+  const a = i * 6 * Math.PI / 180, h = i % 5 === 0, r1 = h ? 250 : 262, r2 = 276;
+  ticks.insertAdjacentHTML('beforeend', `<line class="tick ${h ? 'h' : ''}" x1="${Math.sin(a) * r1}" y1="${-Math.cos(a) * r1}" x2="${Math.sin(a) * r2}" y2="${-Math.cos(a) * r2}" stroke-width="${h ? 3 : 1.5}"/>`);
+}
+for (let i = 1; i <= 12; i++) {
+  const a = i * 30 * Math.PI / 180;
+  nums.insertAdjacentHTML('beforeend', `<text x="${Math.sin(a) * 205}" y="${-Math.cos(a) * 205}">${i}</text>`);
+}
+const now = new Date(), baseM = now.getMinutes() + now.getSeconds() / 60, baseH = now.getHours() % 12 + baseM / 60;
+function arc(deg) {
+  const d = Math.max(0, Math.min(359.9, deg)), r = 225, a0 = baseM * 6, a1 = a0 - d;
+  const p = a => [Math.sin(a * Math.PI / 180) * r, -Math.cos(a * Math.PI / 180) * r];
+  const [x0, y0] = p(a0), [x1, y1] = p(a1);
+  return d < .5 ? '' : `M0 0 L${x0} ${y0} A${r} ${r} 0 ${d > 180 ? 1 : 0} 0 ${x1} ${y1} Z`;
+}
+
+/* Week data */
+const week = [
+  ['Correos', 7, 4.5], ['WhatsApp con clientes', 6, 4.5], ['Cotizaciones y documentos', 4, 2.5],
+  ['Informes y reportes', 4, 2.5], ['Buscar información', 3, 1.5], ['Actas y reuniones', 3, 2], ['Publicaciones en redes', 3, 1.5]
+];
+const MAXH = 8;
+$('#wRows').innerHTML = week.map(([l]) => `<div class="wrow"><span class="wlabel">${l}</span><div class="wtrack"><div class="wbar"></div><div class="wsave"></div></div><span class="wval">0</span></div>`).join('');
+const wRows = $$('.wrow');
+const totalBefore = week.reduce((s, r) => s + r[1], 0), totalSaved = week.reduce((s, r) => s + r[1] - r[2], 0);
+let wPhase = -1;
+function updWeek(p) {
+  let shown = 0;
+  const q = clamp((p - .5) / .35);
+  week.forEach(([l, b, a], i) => {
+    const f = clamp((p - i / week.length * .38) / .08);
+    const row = wRows[i];
+    row.classList.toggle('on', f > 0);
+    const cur = b - (b - a) * q;
+    row.children[1].children[0].style.width = (cur * f / MAXH * 100) + '%';
+    const sv = row.children[1].children[1];
+    sv.style.left = (cur * f / MAXH * 100) + '%'; sv.style.width = ((b - cur) / MAXH * 100) + '%';
+    row.children[2].textContent = (q > 0 ? cur : b * f).toFixed(1).replace('.0', '').replace('.', ',') + ' h';
+    shown += b * f;
+  });
+  const phase = p > .47 ? 1 : 0;
+  if (phase !== wPhase) {
+    wPhase = phase;
+    const t = $('#wTitle');
+    t.style.opacity = 0;
+    setTimeout(() => {
+      t.innerHTML = phase ? 'La misma semana, <em>con IA.</em>' : 'Una semana cualquiera de un empresario.';
+      $('#wKick').textContent = phase ? 'La transformación' : 'El diagnóstico';
+      $('#wLbl').textContent = phase ? 'recuperadas cada semana' : 'en tareas repetitivas';
+      t.style.opacity = 1;
+    }, 200);
+  }
+  $('#wCount').textContent = phase ? (totalSaved * q).toFixed(0) : Math.round(shown);
+}
+
+/* Chat typing */
+const U = 'Escríbeme un WhatsApp para recordarle a un cliente de muchos años que su factura de 450 $ venció hace 15 días. Cordial pero firme, máximo 4 líneas.';
+const A = 'Buenos días, Sr. Ramírez, espero que esté muy bien. Le escribo para recordarle que la factura N.º 1042 por 450 $ venció el pasado día 10. Le agradecería confirmarnos la fecha de pago esta semana. Como siempre, gracias por su confianza de tantos años. 🤝';
+let chatRun = 0;
+async function typeInto(el, txt, speed, id) {
+  el.textContent = ''; el.classList.add('caret');
+  for (let i = 0; i < txt.length; i++) {
+    if (id !== chatRun) return false;
+    el.textContent = txt.slice(0, i + 1);
+    await new Promise(r => setTimeout(r, reduce ? 0 : speed));
+  }
+  el.classList.remove('caret'); return true;
+}
+async function playChat() {
+  const id = ++chatRun;
+  $('#chatFoot').classList.remove('on'); $('#cA').textContent = '';
+  if (!await typeInto($('#cU'), U, 22, id)) return;
+  await new Promise(r => setTimeout(r, 600));
+  if (!await typeInto($('#cA'), A, 14, id)) return;
+  $('#chatFoot').classList.add('on');
+}
+$('#replay').onclick = playChat;
+
+/* Counters */
+function countUp(el) {
+  const to = +el.dataset.count, t0 = performance.now(), d = 1600;
+  const step = t => { const k = clamp((t - t0) / d); el.textContent = Math.round(to * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+}
+
+/* Reveal observer */
+const io = new IntersectionObserver(es => es.forEach(e => {
+  if (!e.isIntersecting) return;
+  const t = e.target;
+  t.classList.add('in');
+  t.querySelectorAll?.('[data-count]').forEach(countUp);
+  if (t.id === 'chat') playChat();
+  io.unobserve(t);
+}), { threshold: .18 });
+$$('.rv, #chat, #anat, #frontierBox, .light, .stat, #bars').forEach(el => io.observe(el));
+
+/* PEDIR */
+const P = [
+  ['P', 'Papel', 'Actúa como mi asistente administrativo con experiencia en atención al cliente. '],
+  ['E', 'Encargo', 'Escribe un mensaje de WhatsApp para un cliente cuyo pedido llegará con retraso. '],
+  ['D', 'Detalles', 'Es un cliente fiel de hace 8 años; el pedido de 40 cajas llegará el viernes en vez del martes por un problema con el transporte. '],
+  ['I', 'Indicaciones', 'Máximo 5 líneas, tono cálido y profesional, ofrece un 5 % de descuento en la próxima compra. '],
+  ['R', 'Revisa', '→ Luego: “Hazlo un poco más corto y que suene más venezolano, más cercano.”']
+];
+const R = [
+  ['Sin instrucciones', 'La IA no sabe qué necesita. Le hará preguntas o le dará algo genérico que no sirve.'],
+  ['Respuesta genérica', 'Estimado cliente:\nLe informamos que su pedido presenta un retraso. Disculpe las molestias.\nAtentamente.'],
+  ['Mejorando', 'Estimado cliente, le escribimos para informarle que su pedido llegará con algunos días de retraso por problemas de transporte. Lamentamos el inconveniente y agradecemos su comprensión.'],
+  ['Buena', 'Buenos días, Sr. Pérez. Le escribo para avisarle que sus 40 cajas llegarán el viernes y no el martes, por un problema con el transporte. Sabemos que cuenta con nosotros desde hace 8 años y lamentamos mucho el cambio.'],
+  ['Muy buena', 'Buenos días, Sr. Pérez 🙌 Le aviso que sus 40 cajas llegarán el viernes y no el martes, por un inconveniente con el transporte. Después de 8 años de confianza, queremos compensarle: tendrá un 5 % de descuento en su próxima compra. ¡Gracias por su paciencia!'],
+  ['Excelente · lista para enviar', '¡Buenos días, Sr. Pérez! 🙌 Le cuento que sus 40 cajas llegan el viernes y no el martes; tuvimos un percance con el transporte. Por tantos años de confianza, su próxima compra lleva 5 % de descuento. ¡Mil gracias por la paciencia!']
+];
+const on = new Set();
+$('#letters').innerHTML = P.map(([l, n], i) => `<button class="letter" data-i="${i}" aria-pressed="false"><b>${l}</b><span>${n}</span></button>`).join('');
+function renderPedir() {
+  $$('.letter').forEach(b => { const a = on.has(+b.dataset.i); b.classList.toggle('on', a); b.setAttribute('aria-pressed', a); });
+  const parts = P.filter((_, i) => on.has(i));
+  $('#promptBox').innerHTML = parts.length
+    ? `<div class="flabel" style="margin-bottom:.6rem">Su pedido</div>` + parts.map(([l, , t]) => `<span class="seg"><mark>${l}</mark> ${t}</span>`).join('')
+    : `<span class="empty">Toque las letras P · E · D · I · R para armar su pedido…</span>`;
+  const k = on.size;
+  $('#meterI').style.width = (k / 5 * 100) + '%';
+  const [tag, txt] = R[k];
+  $('#respBox').innerHTML = `<span class="tag">${tag}</span>${txt}`;
+}
+$('#letters').onclick = e => { const b = e.target.closest('.letter'); if (!b) return; const i = +b.dataset.i; on.has(i) ? on.delete(i) : on.add(i); renderPedir(); };
+renderPedir();
+
+/* Temario (13 semanas) */
+const MES = [null, ['Confianza', '¿Qué es esto y cómo le hablo?'], ['Productividad', '¿Cómo me ahorra tiempo en mi negocio?'], ['Dominio', '¿Cómo la hago mía para siempre?']];
+const W = [
+  { m: 1, t: 'Bienvenida: perder el miedo', o: 'Entender qué es la IA con palabras sencillas y tener la primera conversación exitosa en 20 minutos.',
+    c: ['Presentación: “¿cuánto tiempo le gustaría recuperar?”', 'Qué es la IA: empleado nuevo, autocompletar gigante, “no es Google”', 'Qué puede y qué no puede hacer', 'La IA que ya usa sin saberlo: corrector, GPS, recomendaciones', 'Elegir un asistente para todo el grupo (versión gratuita)'],
+    p: 'Crear la cuenta con ayuda uno a uno y primera conversación por voz.', lab: ['Instalar la app y fijarla en la pantalla principal', 'Tres conversaciones libres guiadas por tarjeta', 'Chat nuevo, buscar un chat viejo, copiar una respuesta'],
+    mi: 'Auditoría de tiempo: anotar 7 días las 5 tareas que más repite y cuánto le toman.', h: 'Línea base de tiempo', tool: 'ChatGPT o Gemini · celular', v: 'Curso 0:01:35 Tutorial de ChatGPT · Hacks 3:20 Dictar por voz · Hacks 14:09 Modo estudiar y aprender' },
+  { m: 1, t: 'Hablarle a la IA: el método PEDIR', o: 'Dominar una sola fórmula para obtener buenas respuestas a la primera.',
+    c: ['Por qué la IA responde mal: le falta contexto', 'PEDIR: Papel · Encargo · Detalles · Indicaciones · Revisa', 'Conversar: “más corto”, “más formal”, “dame tres versiones”', 'Cambiar el tono: formal, cercano, firme, venezolano', 'Elegir las 3 a 5 tareas ancla de cada alumno'],
+    p: 'Mismo pedido antes y después de PEDIR; reescribir 3 mensajes reales.', lab: ['“Juego del jefe”: un compañero hace de IA', 'Tarjeta personal con 5 plantillas PEDIR para su negocio'],
+    mi: 'Usar PEDIR 5 veces en situaciones reales.', tool: 'Asistente de IA', v: 'Curso 0:21:18 Cómo crear prompts · Curso 0:46:24 Asesorarse (perspectiva de experto) · Hacks 1:35 Activar la memoria' },
+  { m: 1, t: 'Correos sin estrés', o: 'Reducir a la mitad el tiempo de leer y responder correos.',
+    c: ['Redactar un correo desde cero con PEDIR', 'Responder un correo largo: resumen + respuesta', 'Correos delicados: rechazar, cobrar, disculparse', 'Plantillas reutilizables', 'Corregir ortografía y redacción', 'La IA propone, usted revisa y envía'],
+    p: 'Responder 5 correos reales (con datos sensibles ocultos).', lab: ['“Bandeja de entrada en 30 minutos” con 10 correos pendientes', 'Crear 3 plantillas para sus correos más frecuentes'],
+    mi: 'Cronometrar la respuesta a 10 correos con y sin IA.', tool: 'IA + correo', v: 'Hacks 4:28 Pegar todo con Ctrl+A · Curso 0:28:02 Reemplazar textos · Curso 0:33:41 Refactorizar (corregir, acortar)' },
+  { m: 1, t: 'WhatsApp y atención al cliente', o: 'Responder más rápido y mejor a clientes y proveedores.',
+    c: ['Cobranza amable pero firme', 'Responder un reclamo sin perder al cliente', 'Resumir un chat o grupo largo en 5 puntos', 'Transcribir y resumir notas de voz', 'WhatsApp Business: respuestas rápidas, bienvenida y ausencia', 'Meta AI dentro de WhatsApp (si está disponible)'],
+    p: 'Escribir los 5 mensajes más difíciles de su semana.', lab: ['Juego de roles: “el cliente molesto”', 'Configurar respuestas rápidas en WhatsApp Business'],
+    mi: 'Responder sus cobranzas o reclamos de la semana con IA.', h: 'Evaluación Mes 1', tool: 'IA + WhatsApp Business', v: 'Curso 0:33:41 Refactorizar (tono y sencillez) · Curso 0:43:36 Ordenar información · Hacks 3:20 Dictar por voz' },
+  { m: 2, t: 'Documentos que se escriben solos', o: 'Redactar y entender documentos en una fracción del tiempo.',
+    c: ['Cotizaciones y presupuestos formales', 'Propuestas comerciales y cartas de presentación', 'Cartas a bancos, instituciones y empleados', 'Resumir un PDF largo: puntos clave, fechas y riesgos', 'Entender contratos: la IA explica, el abogado decide', 'Dictar un documento por voz'],
+    p: 'Crear una cotización real de su negocio.', lab: ['Resumir un documento largo propio', 'Construir su modelo de cotización reutilizable'],
+    mi: 'Preparar 1 documento real con IA y medir el tiempo.', tool: 'IA + dictado por voz', v: 'Curso 1:12:54 Documentos: preguntar y pedir la cita exacta · Hacks 10:08 Modo Canvas' },
+  { m: 2, t: 'Números sin miedo', o: 'Entender las cifras del negocio sin ser experto en Excel.',
+    c: ['Subir una hoja de cálculo y preguntarle en español', 'Lo que más y menos se vende; tendencias', 'Precios, márgenes, descuentos y punto de equilibrio paso a paso', 'Fórmulas de Excel o Sheets explicadas', 'Gráficos sencillos', 'Las cifras se verifican siempre'],
+    p: 'Analizar un archivo de ventas de ejemplo y luego uno propio.', lab: ['Construir el informe semanal de ventas con IA', 'Encontrar el error que “cometió” la IA en un cálculo'],
+    mi: 'Hacer el informe de ventas de la semana con IA.', tool: 'IA + Excel / Google Sheets', v: 'Curso 1:16:00 Analizar tablas CSV/Excel · Curso 0:43:36 Ordenar en tablas · el error de cálculo que la IA cometió en el video' },
+  { m: 2, t: 'El celular como asistente', o: 'Aprovechar la voz, la cámara y la traducción desde el teléfono.',
+    c: ['Modo conversación por voz', 'Fotografiar facturas y recibos y extraer los datos', 'Google Lens: productos, textos y carteles', 'Nota de voz de una reunión → acta con acuerdos', 'Traducción en vivo con proveedores', 'Recordatorios y listas de tareas'],
+    p: 'Convertir una nota de voz en acta de reunión.', lab: ['Estaciones: facturas a tabla · traducción · acta · listas'],
+    mi: 'Hacer el acta de 1 reunión real con IA.', tool: 'Modo voz · Google Lens', v: 'Hacks 8:09 Videollamada y pantalla compartida · Curso 1:51:49 ChatGPT con voz · Curso 1:20:20 Identificar con fotos' },
+  { m: 2, t: 'Investigar y decidir mejor', o: 'Usar la IA como consejero y segunda opinión.',
+    c: ['Buscar información con fuentes', 'Comparar proveedores y productos en una tabla', 'FODA del negocio en 10 minutos', 'Preparar una negociación: argumentos y alternativas', '“Hazme preguntas”: la IA como entrevistador', 'Pedir que la IA critique su propia respuesta'],
+    p: 'FODA real del negocio de cada alumno.', lab: ['Simulación: la IA hace de proveedor difícil', 'Preparar una decisión real con “10 preguntas”'],
+    mi: 'Tomar una decisión consultando a la IA y anotar qué aportó.', h: 'Evaluación Mes 2 · Medición intermedia', tool: 'IA con búsqueda web · Perplexity', v: 'Hacks 11:25 Investigación profunda · Curso 1:00:23 Contrastar datos · Curso 0:50:00 Autocrítica' },
+  { m: 3, t: 'Vender y comunicar en redes', o: 'Hacer el marketing del negocio sin agencia y sin perder horas.',
+    c: ['Ideas para Instagram, Facebook y estados de WhatsApp', 'Descripciones de productos que venden', 'Responder reseñas positivas y negativas', 'Calendario de contenido de un mes', 'Promociones y fechas especiales', '“Escribe como lo diría yo”'],
+    p: 'Crear una semana de publicaciones.', lab: ['Calendario de contenido del mes completo', 'Reescribir sus 5 productos o servicios principales'],
+    mi: 'Publicar al menos 2 contenidos creados con IA.', tool: 'IA + redes sociales', v: 'Curso 0:33:41 Refactorizar y traducir · Curso 0:46:24 Perspectiva de experto · Curso 16:56:54 Idea: responder reseñas' },
+  { m: 3, t: 'Imágenes, flyers y presentaciones', o: 'Crear material visual profesional sin saber de diseño.',
+    c: ['Crear imágenes a partir de una descripción', 'Canva con IA: flyers, publicaciones y tarjetas', 'Mejorar fotos de productos: fondo y luz', 'Presentaciones para clientes en minutos', 'Ética: derechos de imagen, no suplantar personas ni marcas'],
+    p: 'Diseñar un flyer de promoción del negocio.', lab: ['Kit visual: 1 flyer, 3 publicaciones y 1 presentación'],
+    mi: 'Usar una imagen creada o mejorada con IA en su negocio.', tool: 'Canva · generador de imágenes', v: 'Curso 1:03:51 Generar imágenes (consejos de prompt) · Hacks 5:31 Editar fotos con Gemini · Hacks 15:28 Crear páginas web' },
+  { m: 3, t: 'Seguridad, ética y estafas con IA', o: 'Usar la IA sin riesgos y proteger al negocio y a la familia.',
+    c: ['Alucinaciones: por qué inventa y cómo detectarlo', 'El semáforo de datos', 'Privacidad y cómo desactivar el historial', 'Voz clonada, videos falsos, “hijo en apuros”, falsas inversiones', 'Palabra clave familiar y “cuelgo y llamo”', 'Uso responsable y transparencia'],
+    p: 'Detectar errores e inventos en 5 respuestas de IA.', lab: ['Simulacro con voces generadas: señales de alerta', 'Acordar la palabra clave y configurar la privacidad'],
+    mi: 'Compartir el protocolo antiestafas con su familia o su equipo.', tool: 'Todo lo aprendido', v: 'Hacks 3:05 Chats temporales y ver la memoria · Curso 0:49:00 No fiarse ciegamente · errores reales vistos en los videos' },
+  { m: 3, t: 'Su asistente personalizado y su equipo', o: 'Que la IA “conozca” su negocio y que su equipo también la use.',
+    c: ['Instrucciones personalizadas: decirle una vez quién es usted', 'Asistentes personalizados (GPTs, Gems, Proyectos)', 'Organizar la semana: agenda y prioridades', 'Manuales de procesos para su equipo', 'Reglas de uso de IA en su empresa'],
+    p: 'Escribir las instrucciones personalizadas de su negocio.', lab: ['Construir el asistente del negocio y probarlo con 5 tareas', 'Manual de un proceso de su empresa con IA'],
+    mi: 'Preparar su proyecto final.', tool: 'GPTs · Gems · Proyectos', v: 'Curso 1:31:03 Personalizar · Curso 1:37:04 GPTs · Hacks 6:26 Carpetas · Hacks 14:44 Aplicaciones · Hacks 12:10 Modo agente' },
+  { m: 3, t: 'Proyecto final y graduación', o: 'Demostrar lo aprendido y salir con un plan para 90 días.',
+    c: ['Proyecto “Mi negocio con IA” (5 minutos por alumno)', 'Medición final vs. línea base de la semana 1', 'Plan personal de 90 días', 'Cómo seguir aprendiendo', 'Encuesta final y certificados'],
+    p: 'Presentaciones del proyecto final.', lab: ['Presentaciones restantes y retroalimentación', 'Celebración: el grupo muestra sus horas recuperadas'],
+    mi: 'Seguir su plan de 90 días.', h: 'Medición final · Graduación', tool: 'Todo lo aprendido', v: 'Repaso de las 12 funcionalidades · Curso 12:05:12 y 16:17:17 Agentes secretario y de citas (siguiente nivel, opcional)' }
+];
+const EVAL = [['Asistencia y participación', 20], ['Misiones semanales', 25], ['Evaluación Mes 1', 15], ['Evaluación Mes 2', 15], ['Proyecto final', 25]];
+
+$('#months').innerHTML = [1, 2, 3].map(m => `
+  <div class="month rv d${m}"><div class="mn">${m}</div><h3>Mes ${m} · ${MES[m][0]}</h3><p class="q">${MES[m][1]}</p>
+  <ol>${W.map((w, i) => w.m === m ? `<li><button data-w="${i}"><b>${i + 1}</b>${w.t}${w.h ? `<small title="${w.h}">${w.h.split(' ')[0]}</small>` : ''}</button></li>` : '').join('')}</ol></div>`).join('');
+$('#evalbar').innerHTML = EVAL.map(([n, v]) => `<div style="flex:${v}"><b>${v}%</b>${n}</div>`).join('');
+
+let drFilter = 0;
+function renderDrawer() {
+  let html = '', last = 0;
+  W.forEach((w, i) => {
+    if (drFilter && w.m !== drFilter) return;
+    if (w.m !== last) { html += `<div class="dr-month">Mes ${w.m} · ${MES[w.m][0]}</div>`; last = w.m; }
+    html += `<details class="wk" id="wk${i}"><summary><b>${i + 1}</b><span>${w.t}<small>${w.h || w.tool}</small></span></summary>
+      <div class="in"><p>${w.o}</p>
+      <div><h4>Contenidos</h4><ul>${w.c.map(x => `<li>${x}</li>`).join('')}</ul></div>
+      <div><h4>Práctica en clase</h4><p>${w.p}</p></div>
+      <div class="box lab"><h4>Laboratorio · Sesión B</h4><ul>${w.lab.map(x => `<li>${x}</li>`).join('')}</ul></div>
+      <div class="box"><h4>Base en video</h4><p>${w.v}</p></div>
+      <div class="box"><h4>Misión de la semana</h4><p>${w.mi}</p></div>
+      <p class="hint">🛠 ${w.tool}</p></div></details>`;
+  });
+  $('#drBody').innerHTML = html;
+  $$('#drFilters button').forEach(b => b.setAttribute('aria-pressed', +b.dataset.f === drFilter));
+}
+let lastFocus = null;
+function openDrawer(week) {
+  if (week !== undefined && drFilter && W[week].m !== drFilter) drFilter = 0;
+  renderDrawer();
+  lastFocus = document.activeElement;
+  $('#drawer').classList.add('open'); $('#scrim').classList.add('open'); $('#drawer').setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+  if (week !== undefined) { const d = $('#wk' + week); d.open = true; setTimeout(() => d.scrollIntoView({ block: 'start', behavior: reduce ? 'auto' : 'smooth' }), 350); }
+  else $('#drBody').scrollTop = 0;
+  setTimeout(() => $('#drClose').focus(), 50);
+}
+function closeDrawer() {
+  $('#drawer').classList.remove('open'); $('#scrim').classList.remove('open'); $('#drawer').setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+  lastFocus?.focus?.();
+}
+const drawerOpen = () => $('#drawer').classList.contains('open');
+$('#tmBtn').onclick = () => drawerOpen() ? closeDrawer() : openDrawer();
+$('#tmOpen').onclick = () => openDrawer();
+$('#drClose').onclick = closeDrawer; $('#scrim').onclick = closeDrawer;
+$('#months').onclick = e => { const b = e.target.closest('[data-w]'); if (b) openDrawer(+b.dataset.w); };
+$('#drFilters').onclick = e => { const b = e.target.closest('button'); if (!b) return; drFilter = +b.dataset.f; renderDrawer(); $('#drBody').scrollTop = 0; };
+
+/* Anatomía A / B */
+const ANAT = {
+  a: [[15, 'Repaso y logros'], [25, 'Demostración en vivo'], [60, 'Práctica con SUS datos', 1], [10, 'Medir'], [10, 'Misión']],
+  b: [[10, 'Dudas de la clase'], [80, 'Estaciones de práctica con su negocio', 1], [20, 'Reto de la semana'], [10, 'Logros y medición']]
+};
+function renderAnat(k) {
+  $('#anat').innerHTML = ANAT[k].map(([m, t, hot], i) => `<div class="${hot ? 'hot' : ''}" style="flex:${m};transition-delay:${i * .1}s"><b>${m}′</b><span>${t}</span></div>`).join('');
+  $$('#anatSw button').forEach(b => b.setAttribute('aria-pressed', b.dataset.k === k));
+}
+$('#anatSw').onclick = e => { const b = e.target.closest('button'); if (b) renderAnat(b.dataset.k); };
+renderAnat('a');
+
+/* Cronograma */
+const DN = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+const gs = store.get('ia.gen2', null);
+const nextMon = (() => { const d = new Date(); d.setDate(d.getDate() + ((8 - d.getDay()) % 7 || 7)); return d; })();
+const iso = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+$('#gStart').value = gs?.start || iso(nextMon);
+$('#gTime').value = gs?.time || '18:00';
+$('#gPlace').value = gs?.place || '';
+let mode = gs?.mode || 1;
+let selDays = gs?.days || (mode === 2 ? [1, 4] : [1]); // en orden de selección
+function renderDays() {
+  $('#gDays').innerHTML = [1, 2, 3, 4, 5, 6].map(d => `<label><input type="checkbox" value="${d}" ${selDays.includes(d) ? 'checked' : ''} aria-label="${DN[d]}"><span>${DN[d]}</span></label>`).join('');
+  $$('#gMode button').forEach(b => b.setAttribute('aria-pressed', +b.dataset.m === mode));
+  $('#gHint').textContent = mode === 2 ? (selDays.length < 2 ? 'Elija 2 días (el 2.º será el laboratorio)' : 'El 1.er día es la clase y el 2.º el laboratorio') : 'Elija 1 día';
+}
+const fmt = (d, o) => d.toLocaleDateString('es', o);
+function weekDates() {
+  const [y, m, dd] = $('#gStart').value.split('-').map(Number);
+  const d = y ? new Date(y, m - 1, dd) : new Date(nextMon);
+  const days = [...selDays].sort((a, b) => a - b);
+  if (!days.length) days.push(1);
+  const occ = [];
+  const need = mode === 2 && days.length > 1 ? 26 : 13;
+  for (let g = 0; occ.length < need && g < 800; g++) { if (days.includes(d.getDay())) occ.push(new Date(d)); d.setDate(d.getDate() + 1); }
+  return W.map((_, i) => {
+    if (mode === 1) return { a: occ[i] };
+    if (days.length > 1) return { a: occ[i * 2], b: occ[i * 2 + 1] };
+    const b = new Date(occ[i]); b.setDate(b.getDate() + 3); return { a: occ[i], b };
+  });
+}
+const sd = d => fmt(d, { weekday: 'short', day: 'numeric', month: 'short' });
+function renderCrono() {
+  const ds = weekDates(), tm = $('#gTime').value, place = $('#gPlace').value.trim();
+  store.set('ia.gen2', { start: $('#gStart').value, time: tm, place, days: selDays, mode });
+  $('#track').innerHTML = W.map((w, i) => `
+    <article class="sess" data-n="${i + 1}">
+      <div class="date"><span>Semana ${i + 1}</span><span>Mes ${w.m} · ${MES[w.m][0]}</span></div>
+      <div class="when"><span><i>A</i> Clase · ${sd(ds[i].a)} · ${tm}</span>${ds[i].b ? `<span><i class="b">B</i> Laboratorio · ${sd(ds[i].b)} · ${tm}</span>` : ''}</div>
+      <h3>${w.t}</h3><p class="obj">${w.o}</p>
+      <ul>${w.c.slice(0, 3).map(x => `<li>${x}</li>`).join('')}</ul>
+      ${w.h ? `<p class="hito">${w.h}</p>` : `<p class="tool">🛠 ${w.tool}</p>`}
+      <div class="mission"><b>Misión de la semana</b>${w.mi}</div>
+    </article>`).join('');
+  const first = ds[0].a, lastD = ds[12].b || ds[12].a, n = mode === 2 ? 26 : 13;
+  $('#gRange').innerHTML = `Del <b>${fmt(first, { day: 'numeric', month: 'long' })}</b> al <b>${fmt(lastD, { day: 'numeric', month: 'long', year: 'numeric' })}</b> · 13 semanas · ${n} sesiones · ${n * 2} horas${place ? ' · ' + place : ''}`;
+  layout();
+}
+function printCrono() {
+  const ds = weekDates(), tm = $('#gTime').value;
+  $('#printSheet').innerHTML = `<h1>Recupere su Tiempo · Cronograma</h1><p>${$('#gRange').textContent} · Modalidad ${mode === 2 ? 'intensiva (2 por semana)' : 'esencial (1 por semana)'}</p>
+    <table><tr><th>Sem.</th><th>Fechas</th><th>Tema</th><th>Contenidos</th><th>Misión</th></tr>
+    ${W.map((w, i) => `<tr><td>${i + 1}<br><small>Mes ${w.m}</small></td><td>A: ${fmt(ds[i].a, { weekday: 'long', day: 'numeric', month: 'long' })}${ds[i].b ? `<br>B: ${fmt(ds[i].b, { weekday: 'long', day: 'numeric', month: 'long' })}` : ''}<br>${tm}</td><td><b>${w.t}</b>${w.h ? '<br>' + w.h : ''}</td><td>${w.c.join('<br>')}</td><td>${w.mi}<br><small><b>Video:</b> ${w.v}</small></td></tr>`).join('')}</table>`;
+  window.print();
+}
+function printTemario() {
+  $('#printSheet').innerHTML = `<h1>Recupere su Tiempo · Temario</h1><p>Programa de IA práctica para empresarios · 3 meses · 13 semanas · Sesión A (clase) + Sesión B opcional (laboratorio)</p>
+    <table><tr><th>Sem.</th><th>Tema y objetivo</th><th>Contenidos</th><th>Práctica y laboratorio</th><th>Misión</th></tr>
+    ${W.map((w, i) => `<tr><td>${i + 1}<br><small>Mes ${w.m}<br>${MES[w.m][0]}</small></td><td><b>${w.t}</b><br>${w.o}${w.h ? '<br><b>' + w.h + '</b>' : ''}</td><td>${w.c.join('<br>')}</td><td><b>A:</b> ${w.p}<br><b>B:</b> ${w.lab.join('; ')}</td><td>${w.mi}<br><small><b>Video:</b> ${w.v}</small></td></tr>`).join('')}</table>
+    <p style="margin-top:14px"><b>Evaluación:</b> ${EVAL.map(([n, v]) => `${n} ${v}%`).join(' · ')}. Certificado: asistencia ≥ 75 %, 3 tareas ancla medidas y proyecto final.</p>`;
+  window.print();
+}
+['#gStart', '#gTime', '#gPlace'].forEach(s => $(s).addEventListener('input', renderCrono));
+$('#gMode').onclick = e => {
+  const b = e.target.closest('button'); if (!b) return;
+  mode = +b.dataset.m;
+  if (mode === 1 && selDays.length > 1) selDays = [selDays[0]];
+  if (mode === 2 && selDays.length === 1) selDays = [selDays[0], selDays[0] + 3 > 6 ? selDays[0] - 3 : selDays[0] + 3];
+  renderDays(); renderCrono();
+};
+$('#gDays').addEventListener('change', e => {
+  const v = +e.target.value;
+  if (e.target.checked) { selDays = [...selDays.filter(x => x !== v), v]; while (selDays.length > mode) selDays.shift(); }
+  else selDays = selDays.filter(x => x !== v);
+  renderDays(); renderCrono();
+});
+$('#printBtn').onclick = printCrono;
+$('#tmPrint').onclick = printTemario;
+renderDays();
+
+
+/* Casos */
+const C = [
+  { n: 'Cotización formal', b: 45, a: 12,
+    sb: [['Buscar una cotización vieja para copiar', 10], ['Cambiar datos, precios y condiciones', 15], ['Redactar el texto de presentación', 12], ['Revisar ortografía y formato', 8]],
+    sa: [['Dictarle los datos por voz a la IA', 3], ['Pedir la cotización con PEDIR', 2], ['Revisar números y ajustar', 7]] },
+  { n: 'Resumir un contrato', b: 90, a: 20,
+    sb: [['Leer las 20 páginas completas', 60], ['Subrayar fechas, montos y riesgos', 20], ['Anotar dudas para el abogado', 10]],
+    sa: [['Subir el PDF y pedir resumen de 1 página', 3], ['Preguntar: “¿qué riesgos ve para mí?”', 7], ['Verificar las cláusulas señaladas', 10]] },
+  { n: 'Informe de ventas', b: 120, a: 30,
+    sb: [['Ordenar la hoja de cálculo', 30], ['Calcular totales y comparaciones', 40], ['Hacer gráficos', 25], ['Escribir conclusiones', 25]],
+    sa: [['Subir el Excel a la IA', 2], ['Pedir: top productos, tendencias y gráfico', 8], ['Revisar cifras clave', 12], ['Ajustar conclusiones', 8]] },
+  { n: 'Publicaciones de la semana', b: 150, a: 35,
+    sb: [['Pensar qué publicar', 40], ['Escribir 5 textos', 60], ['Buscar ideas de imágenes', 30], ['Corregir y programar', 20]],
+    sa: [['Pedir 5 publicaciones con ideas de foto', 5], ['Elegir y personalizar', 15], ['Diseñar en Canva con plantillas', 15]] },
+  { n: 'Acta de reunión', b: 40, a: 8,
+    sb: [['Pasar en limpio las notas', 20], ['Ordenar acuerdos y responsables', 12], ['Redactar y enviar', 8]],
+    sa: [['Grabar nota de voz del resumen', 2], ['Pedir acta con acuerdos y fechas', 1], ['Revisar y enviar', 5]] }
+];
+let ci = 0, useAI = false, cminCur = 0;
+$('#ctabs').innerHTML = C.map((c, i) => `<button role="tab" aria-selected="${i === 0}" data-i="${i}">${c.n}<small>−${Math.round((1 - c.a / c.b) * 100)}%</small></button>`).join('');
+function animNum(el, from, to) {
+  const t0 = performance.now();
+  const f = t => { const k = clamp((t - t0) / 700); el.textContent = Math.round(from + (to - from) * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(f); };
+  requestAnimationFrame(f);
+}
+function renderCase() {
+  const c = C[ci], v = useAI ? c.a : c.b;
+  $('#sw').classList.toggle('ai', useAI);
+  $('#swOff').classList.toggle('act', !useAI); $('#swOn').classList.toggle('act', useAI);
+  animNum($('#cMin'), cminCur, v); cminCur = v;
+  $('#cBar').style.width = (v / C[ci].b * 100) + '%';
+  $('#cSteps').innerHTML = (useAI ? c.sa : c.sb).map(([t, m], i) => `<li style="animation-delay:${i * .08}s">${t}<em>${m} min</em></li>`).join('');
+  const sb = $('#cSaved'); sb.classList.toggle('on', useAI);
+  sb.textContent = `⏱ ${c.b - c.a} minutos recuperados cada vez`;
+}
+$('#ctabs').onclick = e => { const b = e.target.closest('button'); if (!b) return; ci = +b.dataset.i; useAI = false; $$('#ctabs button').forEach(x => x.setAttribute('aria-selected', x === b)); renderCase(); };
+$('#swOff').onclick = () => { useAI = false; renderCase(); };
+$('#swOn').onclick = () => { useAI = true; renderCase(); };
+renderCase();
+
+/* Medidor */
+const uid = () => Math.random().toString(36).slice(2, 9);
+let M = store.get('ia.medidor', null);
+if (!M || !M.profiles || !Object.keys(M.profiles).length) {
+  const id = uid();
+  M = { cur: id, profiles: { [id]: { name: 'Alumno de ejemplo', rate: 15, rows: [
+    { t: 'Responder correos de proveedores', f: 10, b: 12, a: 5 },
+    { t: 'Hacer cotizaciones', f: 3, b: 40, a: 15 },
+    { t: 'Informe de ventas del lunes', f: 1, b: 90, a: 30 },
+    { t: 'Publicaciones en Instagram', f: 3, b: 30, a: 10 }
+  ] } } };
+}
+const saveM = () => store.set('ia.medidor', M);
+const prof = () => M.profiles[M.cur];
+const nf = (n, d = 0) => n.toLocaleString('es', { maximumFractionDigits: d, minimumFractionDigits: 0 });
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+function calc(p) {
+  let saved = 0, before = 0;
+  p.rows.forEach(r => { const f = +r.f || 0, b = +r.b || 0, a = +r.a || 0; saved += f * (b - a); before += f * b; });
+  const year = saved * 48 / 60;
+  return { saved, before, pct: before ? saved / before : 0, year, days: year / 8, money: year * (+p.rate || 0) };
+}
+function renderSel() {
+  $('#mSel').innerHTML = Object.entries(M.profiles).map(([id, p]) => `<option value="${id}" ${id === M.cur ? 'selected' : ''}>${esc(p.name || 'Sin nombre')}</option>`).join('');
+  $('#mName').value = prof().name; $('#mRate').value = prof().rate;
+}
+function renderRows() {
+  $('#mBody').innerHTML = prof().rows.map((r, i) => `<tr data-i="${i}">
+    <td><input data-k="t" value="${esc(r.t)}" placeholder="Ej.: responder correos" aria-label="Tarea"></td>
+    <td data-l="Veces/sem"><input data-k="f" type="number" min="0" value="${r.f}" aria-label="Veces por semana"></td>
+    <td data-l="Min antes"><input data-k="b" type="number" min="0" value="${r.b}" aria-label="Minutos antes"></td>
+    <td data-l="Min con IA"><input data-k="a" type="number" min="0" value="${r.a}" aria-label="Minutos con IA"></td>
+    <td class="sv" data-l="Ahorro/sem"></td><td><button class="del" aria-label="Eliminar tarea">×</button></td></tr>`).join('');
+  renderCalc();
+}
+function renderCalc() {
+  const p = prof(), c = calc(p);
+  $$('#mBody tr').forEach((tr, i) => { const r = p.rows[i]; tr.querySelector('.sv').textContent = nf((+r.f || 0) * ((+r.b || 0) - (+r.a || 0))) + ' min'; });
+  $('#mRing').style.strokeDashoffset = 603.2 * (1 - clamp(c.pct));
+  $('#mPct').textContent = Math.round(c.pct * 100) + '%';
+  $('#kWeek').textContent = nf(c.saved / 60, 1) + ' h';
+  $('#kYear').textContent = nf(c.year) + ' h';
+  $('#kDays').textContent = nf(c.days);
+  $('#kMoney').textContent = '$' + nf(c.money);
+  const g = Object.values(M.profiles).reduce((s, p) => s + calc(p).year, 0);
+  $('#grpTotal').textContent = nf(g) + ' horas';
+  saveM();
+}
+$('#mBody').addEventListener('input', e => {
+  const k = e.target.dataset.k; if (!k) return;
+  const i = +e.target.closest('tr').dataset.i;
+  prof().rows[i][k] = k === 't' ? e.target.value : e.target.value === '' ? '' : +e.target.value;
+  renderCalc();
+});
+$('#mBody').addEventListener('click', e => { if (!e.target.closest('.del')) return; prof().rows.splice(+e.target.closest('tr').dataset.i, 1); renderRows(); });
+$('#mAdd').onclick = () => { prof().rows.push({ t: '', f: 1, b: 30, a: 15 }); renderRows(); $('#mBody tr:last-child input').focus(); };
+$('#mName').oninput = e => { prof().name = e.target.value; renderSel(); $('#mName').focus(); renderCalc(); };
+$('#mRate').oninput = e => { prof().rate = +e.target.value; renderCalc(); };
+$('#mSel').onchange = e => { M.cur = e.target.value; renderSel(); renderRows(); };
+$('#mNew').onclick = () => { const id = uid(); M.profiles[id] = { name: 'Alumno ' + (Object.keys(M.profiles).length + 1), rate: 15, rows: [{ t: '', f: 1, b: 30, a: 15 }] }; M.cur = id; renderSel(); renderRows(); $('#mName').select(); };
+let delArmed = null;
+$('#mDelP').onclick = () => {
+  const b = $('#mDelP');
+  if (!delArmed) { b.textContent = '¿Seguro? Toque de nuevo'; delArmed = setTimeout(() => { b.textContent = 'Eliminar alumno'; delArmed = null; }, 3500); return; }
+  clearTimeout(delArmed); delArmed = null; b.textContent = 'Eliminar alumno';
+  delete M.profiles[M.cur];
+  if (!Object.keys(M.profiles).length) { const id = uid(); M.profiles[id] = { name: 'Alumno 1', rate: 15, rows: [] }; }
+  M.cur = Object.keys(M.profiles)[0]; renderSel(); renderRows();
+};
+function tableRows() {
+  const out = [['Alumno', 'Valor hora USD', 'Tarea', 'Veces/semana', 'Min antes', 'Min con IA', 'Min ahorrados/semana', 'Horas/año']];
+  Object.values(M.profiles).forEach(p => p.rows.forEach(r => {
+    const s = (+r.f || 0) * ((+r.b || 0) - (+r.a || 0));
+    out.push([p.name, p.rate, r.t, r.f, r.b, r.a, s, (s * 48 / 60).toFixed(1).replace('.', ',')]);
+  }));
+  return out;
+}
+$('#mCopy').onclick = async () => {
+  const b = $('#mCopy'), txt = tableRows().map(r => r.join('\t')).join('\n');
+  try { await navigator.clipboard.writeText(txt); b.textContent = '✓ Copiado: péguelo en Excel'; }
+  catch { b.textContent = 'No se pudo copiar'; }
+  setTimeout(() => b.textContent = '⧉ Copiar para Excel', 2500);
+};
+$('#mExport').onclick = () => {
+  const q = v => `"${String(v).replace(/"/g, '""')}"`;
+  const lines = tableRows().map(r => r.map(q).join(';'));
+  const blob = new Blob(['﻿' + lines.join('\n')], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `medicion-tiempo-ia-${iso(new Date())}.csv`; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+};
+renderSel(); renderRows();
+if (window.self !== window.top) ['#mExport', '#printBtn', '#tmPrint'].forEach(s => $(s).hidden = true);
+
+/* Scroll engine */
+const pinWeek = $('#week'), pinCrono = $('#crono'), track = $('#track');
+const cronoPinned = () => !matchMedia('(max-width:860px),(max-height:620px)').matches;
+function layout() {
+  if (cronoPinned()) {
+    const extra = Math.max(0, track.scrollWidth - innerWidth);
+    pinCrono.style.height = (innerHeight + extra) + 'px';
+  } else pinCrono.style.height = '';
+  tick();
+}
+const pinP = el => { const r = el.getBoundingClientRect(); return clamp(-r.top / Math.max(1, el.offsetHeight - innerHeight)); };
+let ticking = false;
+function tick() {
+  ticking = false;
+  const y = scrollY, H = document.documentElement.scrollHeight - innerHeight;
+  const gp = clamp(y / Math.max(1, H));
+  $('#bar').style.width = gp * 100 + '%';
+  $('#hudRing').style.strokeDashoffset = 106.8 * (1 - gp);
+  $('#hudHand').setAttribute('transform', `rotate(${-gp * 720} 20 20)`);
+  // hero clock rewinds
+  const hh = Math.max(1, innerHeight * 1.2), rw = Math.min(y, hh) / hh * 330;
+  $('#mHand').setAttribute('transform', `rotate(${baseM * 6 - rw})`);
+  $('#hHand').setAttribute('transform', `rotate(${baseH * 30 - rw / 12})`);
+  $('#sweep').setAttribute('d', arc(rw));
+  updWeek(pinP(pinWeek));
+  if (cronoPinned()) {
+    const p = pinP(pinCrono), extra = Math.max(0, track.scrollWidth - innerWidth);
+    track.style.transform = `translateX(${-p * extra}px)`;
+    $('#cronoBar').style.width = p * 100 + '%';
+  }
+  // active section
+  let idx = 0;
+  sections.forEach((s, i) => { if (s.getBoundingClientRect().top <= innerHeight * .45) idx = i; });
+  $$('#dots a').forEach((a, i) => a.classList.toggle('on', i === idx));
+  $('#hudIdx').textContent = String(idx + 1).padStart(2, '0') + ' / ' + sections.length;
+  $('#hudName').textContent = sections[idx].dataset.title;
+}
+addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(tick); } }, { passive: true });
+addEventListener('resize', layout);
+
+/* Keyboard presenter */
+function stops() {
+  const out = [];
+  sections.forEach(s => {
+    const top = s.offsetTop, n = +s.dataset.steps || 0;
+    if (s.classList.contains('pin') && n > 1 && s.offsetHeight > innerHeight * 1.2) {
+      const span = s.offsetHeight - innerHeight;
+      for (let i = 0; i < n; i++) out.push(top + span * i / (n - 1));
+    } else out.push(top);
+  });
+  return out;
+}
+addEventListener('keydown', e => {
+  if (drawerOpen()) { if (e.key === 'Escape' || e.key === 't' || e.key === 'T') closeDrawer(); return; }
+  if (e.target.matches('input,select,textarea,button')) { if (e.key !== 'Escape') return; e.target.blur(); return; }
+  const k = e.key;
+  if (k === 't' || k === 'T') { openDrawer(); return; }
+  if (k === 'f' || k === 'F') { toggleFs(); return; }
+  const fwd = ['ArrowDown', 'ArrowRight', 'PageDown', ' '].includes(k), back = ['ArrowUp', 'ArrowLeft', 'PageUp'].includes(k);
+  if (!fwd && !back) return;
+  e.preventDefault();
+  const st = stops(), y = scrollY;
+  const target = fwd ? st.find(s => s > y + 5) : [...st].reverse().find(s => s < y - 5);
+  if (target !== undefined) scrollTo({ top: target, behavior: reduce ? 'auto' : 'smooth' });
+});
+
+$$('.month.rv').forEach(el => io.observe(el));
+renderCrono();
+layout();
+})();
+</script>
+</body>
+</html>
